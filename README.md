@@ -3,7 +3,6 @@
 This Connector allows you to fetch social posts from Facebook. 
 Before you start be sure you've checked out the [Setup Instructions](../00_Setup.md).
 
-![image](https://user-images.githubusercontent.com/700119/94448014-bce31980-01aa-11eb-8869-e38bde73d253.png)
 ![image](https://user-images.githubusercontent.com/700119/94452916-5f51cb80-01b0-11eb-86b2-026d8b7ef6f7.png)
 
 #### Requirements
@@ -11,12 +10,14 @@ Before you start be sure you've checked out the [Setup Instructions](../00_Setup
 
 ## Installation
 
+### I. Add Dependency
 ```json
 "require" : {
     "dachcom-digital/social-data-facebook-connector" : "~1.0.0",
 }
 ```
 
+### II. Register Connector Bundle
 ```php
 // src/AppKernel.php
 use Pimcore\Kernel;
@@ -31,7 +32,12 @@ class AppKernel extends Kernel
 }
 ```
 
-## Requirements
+### III. Install Assets
+```bash
+bin/console assets:install web --relative --symlink
+```
+
+## Third-Party Requirements
 To use this connector, this bundle requires some additional packages:
 - [facebook/graph-sdk](https://github.com/facebookarchive/php-graph-sdk/blob/5.x/README.md) (Mostly already installed within a Pimcore Installation)
 
@@ -55,10 +61,10 @@ Now head back to the backend (`System` => `Social Data` => `Connector Configurat
 - Click `Connect`
   
 ## Connection
-![image](https://user-images.githubusercontent.com/700119/79236998-f37fde80-7e6d-11ea-8b94-7bc015f50be0.png)
+![image](https://user-images.githubusercontent.com/700119/95068621-d1249a80-0705-11eb-8ebb-b3b15e5e832f.png)
 
 This will guide you through the facebook token generation. 
-After hitting the "Connect" button, a popup will open to guide you through facebook authentication process. 
+After hitting the "Connect" button, **a popup** will open to guide you through facebook authentication process. 
 If everything worked out fine, the connection setup is complete after the popup closes.
 Otherwise, you'll receive an error message. You may then need to repeat the connection step.
 

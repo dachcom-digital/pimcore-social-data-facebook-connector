@@ -49,13 +49,24 @@ class FacebookController extends AdminController
     /**
      * @param Request $request
      *
-     * @return RedirectResponse
-     *
+     * @return RedirectResponse|Response
      * @throws FacebookSDKException
      */
     public function connectAction(Request $request)
     {
-        $connectorEngineConfig = $this->getConnectorEngineConfig();
+        try {
+            $connectorEngineConfig = $this->getConnectorEngineConfig();
+        } catch (\Throwable $e) {
+            return $this->render('@SocialData/connect-layout.html.twig', [
+                'content' => [
+                    'error'       => true,
+                    'code'        => 500,
+                    'identifier'  => 'general_error',
+                    'reason'      => 'connector engine configuration error',
+                    'description' => $e->getMessage()
+                ]
+            ]);
+        }
 
         $fb = $this->facebookClient->getClient($connectorEngineConfig);
         $helper = $fb->getRedirectLoginHelper();
@@ -79,7 +90,19 @@ class FacebookController extends AdminController
      */
     public function checkAction(Request $request)
     {
-        $connectorEngineConfig = $this->getConnectorEngineConfig();
+        try {
+            $connectorEngineConfig = $this->getConnectorEngineConfig();
+        } catch (\Throwable $e) {
+            return $this->render('@SocialData/connect-layout.html.twig', [
+                'content' => [
+                    'error'       => true,
+                    'code'        => 500,
+                    'identifier'  => 'general_error',
+                    'reason'      => 'long lived access token error',
+                    'description' => $e->getMessage()
+                ]
+            ]);
+        }
 
         $fb = $this->facebookClient->getClient($connectorEngineConfig);
         $helper = $fb->getRedirectLoginHelper();
@@ -130,7 +153,7 @@ class FacebookController extends AdminController
 
         return $this->render('@SocialData/connect-layout.html.twig', [
             'content' => [
-                'error'   => false
+                'error' => false
             ]
         ]);
     }
