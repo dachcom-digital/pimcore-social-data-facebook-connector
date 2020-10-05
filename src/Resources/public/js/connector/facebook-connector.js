@@ -44,7 +44,6 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
     handleConnectWindow: function (mainBtn, btn) {
 
         var win = btn.up('window'),
-            buttons = btn.up('window').query('button'),
             loginWindow,
             loginTimer,
             stateData = null,
@@ -133,6 +132,13 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
     getCustomConfigurationFields: function (data) {
 
         return [
+            {
+                xtype: 'textfield',
+                fieldLabel: 'Token Expiring Date',
+                disabled: true,
+                hidden: !data.hasOwnProperty('accessToken') || data.accessToken === null || data.accessToken === '',
+                value: data.hasOwnProperty('accessTokenExpiresAt') ? data.accessTokenExpiresAt === null ? 'never' : data.accessTokenExpiresAt : '--'
+            },
             {
                 xtype: 'textfield',
                 name: 'appId',

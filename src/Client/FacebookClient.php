@@ -36,7 +36,7 @@ class FacebookClient
             'app_id'                  => $configuration->getAppId(),
             'app_secret'              => $configuration->getAppSecret(),
             'persistent_data_handler' => new FacebookDataHandler($this->session),
-            'default_graph_version'   => 'v7.0'
+            'default_graph_version'   => 'v8.0'
         ]);
     }
 }

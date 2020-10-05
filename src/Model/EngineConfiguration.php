@@ -15,7 +15,7 @@ class EngineConfiguration implements ConnectorEngineConfigurationInterface
     protected $accessToken;
 
     /**
-     * @var string
+     * @var null|\DateTime
      *
      * @internal
      */
@@ -63,8 +63,8 @@ class EngineConfiguration implements ConnectorEngineConfigurationInterface
     }
 
     /**
-     * @param string $expiresAt
-     * @param bool   $forceUpdate
+     * @param null|\DateTime $expiresAt
+     * @param bool           $forceUpdate
      */
     public function setAccessTokenExpiresAt($expiresAt, $forceUpdate = false)
     {
@@ -78,7 +78,7 @@ class EngineConfiguration implements ConnectorEngineConfigurationInterface
     }
 
     /**
-     * @return string
+     * @return null|\DateTime
      */
     public function getAccessTokenExpiresAt()
     {

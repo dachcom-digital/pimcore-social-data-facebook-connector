@@ -133,8 +133,7 @@ class FacebookController extends AdminController
         }
 
         try {
-            $oAuth2Client = $fb->getOAuth2Client();
-            $accessToken = $oAuth2Client->getLongLivedAccessToken($accessToken);
+            $accessToken = $fb->getOAuth2Client()->getLongLivedAccessToken($accessToken);
         } catch (FacebookSDKException $e) {
             return $this->render('@SocialData/connect-layout.html.twig', [
                 'content' => [
@@ -166,7 +165,7 @@ class FacebookController extends AdminController
         $connectorDefinition = $this->connectorService->getConnectorDefinition('facebook', true);
 
         if (!$connectorDefinition->engineIsLoaded()) {
-            throw $this->createNotFoundException('Not Found');
+            throw new HttpException(400, 'Engine is not loaded.');
         }
 
         $connectorEngineConfig = $connectorDefinition->getEngineConfiguration();

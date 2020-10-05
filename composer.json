@@ -2,7 +2,7 @@
     "name": "dachcom-digital/social-data-facebook-connector",
     "type": "pimcore-social-data-connector-bundle",
     "license": "GPL-3.0-or-later",
-    "description": "Pimcore Social Data Bundle Facebook Connector",
+    "description": "Pimcore Social Data Facebook Connector",
     "keywords": [
         "pimcore",
         "social",
