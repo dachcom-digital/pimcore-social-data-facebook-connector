@@ -1,0 +1,7 @@
+social_data.connector.facebook.new_feed: 'New Feed'
+social_data.connector.facebook.invalid_token: 'No valid token found. Please install this connector first.'
+social_data.connector.facebook.connect: 'Connect'
+social_data.connector.facebook.connect_service: 'Facebook Connect Service'
+social_data.connector.facebook.connect_service_note: 'You need to connect your application. Click "Connect" to start the authentication process.'
+social_data.wall.feed.facebook.page_id: 'Page ID'
+social_data.wall.feed.facebook.limit: 'Limit'
