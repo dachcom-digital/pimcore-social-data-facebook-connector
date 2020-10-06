@@ -6,6 +6,7 @@ use Facebook\Exceptions\FacebookSDKException;
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
+use SocialDataBundle\Controller\Admin\Traits\ConnectResponseTrait;
 use SocialDataBundle\Service\ConnectorServiceInterface;
 use SocialDataBundle\Service\EnvironmentServiceInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -16,6 +17,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class FacebookController extends AdminController
 {
+    use ConnectResponseTrait;
+
     /**
      * @var FacebookClient
      */
@@ -57,15 +60,7 @@ class FacebookController extends AdminController
         try {
             $connectorEngineConfig = $this->getConnectorEngineConfig();
         } catch (\Throwable $e) {
-            return $this->render('@SocialData/connect-layout.html.twig', [
-                'content' => [
-                    'error'       => true,
-                    'code'        => 500,
-                    'identifier'  => 'general_error',
-                    'reason'      => 'connector engine configuration error',
-                    'description' => $e->getMessage()
-                ]
-            ]);
+            return $this->buildConnectErrorResponse(500, 'general_error', 'connector engine configuration error', $e->getMessage());
         }
 
         $fb = $this->facebookClient->getClient($connectorEngineConfig);
@@ -93,15 +88,7 @@ class FacebookController extends AdminController
         try {
             $connectorEngineConfig = $this->getConnectorEngineConfig();
         } catch (\Throwable $e) {
-            return $this->render('@SocialData/connect-layout.html.twig', [
-                'content' => [
-                    'error'       => true,
-                    'code'        => 500,
-                    'identifier'  => 'general_error',
-                    'reason'      => 'long lived access token error',
-                    'description' => $e->getMessage()
-                ]
-            ]);
+            return $this->buildConnectErrorResponse(500, 'general_error', 'connector engine configuration error', $e->getMessage());
         }
 
         $fb = $this->facebookClient->getClient($connectorEngineConfig);
@@ -110,51 +97,23 @@ class FacebookController extends AdminController
         if (!$accessToken = $helper->getAccessToken()) {
 
             if ($helper->getError()) {
-                return $this->render('@SocialData/connect-layout.html.twig', [
-                    'content' => [
-                        'error'       => true,
-                        'code'        => $helper->getErrorCode(),
-                        'identifier'  => $helper->getError(),
-                        'reason'      => $helper->getErrorReason(),
-                        'description' => $helper->getErrorDescription()
-                    ]
-                ]);
+                return $this->buildConnectErrorResponse($helper->getErrorCode(), $helper->getError(), $helper->getErrorReason(), $helper->getErrorDescription());
             }
 
-            return $this->render('@SocialData/connect-layout.html.twig', [
-                'content' => [
-                    'error'       => true,
-                    'code'        => 500,
-                    'identifier'  => 'general_error',
-                    'reason'      => 'invalid access token',
-                    'description' => $request->query->get('error_message', 'Unknown Error')
-                ]
-            ]);
+            return $this->buildConnectErrorResponse(500, 'general_error', 'invalid access token', $request->query->get('error_message', 'Unknown Error'));
         }
 
         try {
             $accessToken = $fb->getOAuth2Client()->getLongLivedAccessToken($accessToken);
         } catch (FacebookSDKException $e) {
-            return $this->render('@SocialData/connect-layout.html.twig', [
-                'content' => [
-                    'error'       => true,
-                    'code'        => 500,
-                    'identifier'  => 'general_error',
-                    'reason'      => 'long lived access token error',
-                    'description' => $e->getMessage()
-                ]
-            ]);
+            return $this->buildConnectErrorResponse(500, 'general_error', 'long lived access token error', $e->getMessage());
         }
 
         $connectorEngineConfig->setAccessToken($accessToken->getValue());
         $connectorEngineConfig->setAccessTokenExpiresAt($accessToken->getExpiresAt());
         $this->connectorService->updateConnectorEngineConfiguration('facebook', $connectorEngineConfig);
 
-        return $this->render('@SocialData/connect-layout.html.twig', [
-            'content' => [
-                'error' => false
-            ]
-        ]);
+        return $this->buildConnectSuccessResponse();
     }
 
     /**
