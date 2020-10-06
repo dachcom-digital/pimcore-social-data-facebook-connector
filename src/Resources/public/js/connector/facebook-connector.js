@@ -5,6 +5,31 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
         return true;
     },
 
+    afterSaveCustomConfiguration: function () {
+
+        var fieldset = this.customConfigurationPanel.up('fieldset').previousSibling();
+
+        this.changeState(fieldset, 'connection');
+    },
+
+    afterChangeState: function (stateType, active) {
+        if (stateType === 'connection' && active === true) {
+            this.refreshCustomConfigurationPanel();
+        }
+    },
+
+    beforeDisableFieldState: function (stateType, toDisableState) {
+
+        if (stateType === 'connection' && toDisableState === false) {
+            return !(
+                this.customConfiguration.hasOwnProperty('appId') &&
+                this.customConfiguration.hasOwnProperty('appSecret')
+            );
+        }
+
+        return toDisableState;
+    },
+
     connectHandler: function (stateType, mainBtn) {
 
         var stateData = this.states[stateType],
@@ -44,92 +69,38 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
     handleConnectWindow: function (mainBtn, btn) {
 
         var win = btn.up('window'),
-            loginWindow,
-            loginTimer,
-            stateData = null,
-            windowSize = {
-                width: 800,
-                height: 550,
-            },
-            windowLocation = {
-                left: ((window.screenLeft ? window.screenLeft : window.screenX) + (window.innerWidth / 2)) - (windowSize.width / 2),
-                top: ((window.screenTop ? window.screenTop : window.screenY) + (window.screen.availHeight / 2)) - (window.innerHeight / 2)
-            },
-            features = [
-                'toolbar=1',
-                'location=1',
-                'width=' + windowSize.width,
-                'height=' + windowSize.height,
-                'left=' + windowLocation.left,
-                'top=' + windowLocation.top,
-            ],
-            checkPopupState = function checkLoginWindowClosure() {
-
-                var stateElement,
-                    popupDocument;
-
-                if (!loginWindow) {
-                    return;
-                }
-
-                if (stateData !== null) {
-
-                    loginWindow.close();
-
-                    clearInterval(loginTimer);
-                    win.setLoading(false);
-
-                    if (stateData.error === true) {
-                        btn.setDisabled(false);
-                        Ext.MessageBox.alert(t('error') + ' ' + stateData.identifier, stateData.description + ' (' + stateData.reason + ')');
-                        return;
-                    }
-
-                    win.close();
-                    this.stateHandler('connection', mainBtn);
-
-                    return;
-
-                } else if (loginWindow.closed) {
-
-                    clearInterval(loginTimer);
-                    btn.setDisabled(false);
-                    win.setLoading(false);
-
-                    return;
-                }
-
-                try {
-                    popupDocument = loginWindow.document;
-                } catch (error) {
-                    return;
-                }
-
-                if (popupDocument.domain !== document.domain) {
-                    return;
-                }
-
-                try {
-                    stateElement = popupDocument.getElementById('connect-response');
-                } catch (error) {
-                    return;
-                }
-
-                if (stateElement) {
-                    stateData = Ext.decode(stateElement.value);
-                }
-
-            }.bind(this);
+            connectWindow;
 
         btn.setDisabled(true);
         win.setLoading(true);
 
-        // use http://localhost:2332 or something in dev context
-        loginWindow = window.open(window.location.origin + '/admin/social-data/connector/facebook/connect', 'LoginWindow', features.join(','));
-        loginTimer = setInterval(checkPopupState, 500);
+        connectWindow = new SocialData.Component.ConnectWindow(
+            '/admin/social-data/connector/facebook/connect',
+            // success
+            function (stateData) {
+                win.setLoading(false);
+                win.close();
+                this.stateHandler('connection', mainBtn);
+            }.bind(this),
+            // error
+            function (stateData) {
+                win.setLoading(false);
+                btn.setDisabled(false);
+                Ext.MessageBox.alert(t('error') + ' ' + stateData.identifier, stateData.description + ' (' + stateData.reason + ')');
+            },
+            // closed
+            function () {
+                btn.setDisabled(false);
+                win.setLoading(false);
+            }
+        );
+
+        connectWindow.open();
     },
 
-    getCustomConfigurationFields: function (data) {
+    getCustomConfigurationFields: function () {
+
+        var data = this.customConfiguration;
 
         return [
             {
@@ -140,6 +111,7 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
                 value: data.hasOwnProperty('accessTokenExpiresAt') ? data.accessTokenExpiresAt === null ? 'never' : data.accessTokenExpiresAt : '--'
             },
             {
+                trackResetOnLoad: true,
                 xtype: 'textfield',
                 name: 'appId',
                 fieldLabel: 'App ID',
@@ -147,12 +119,81 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
                 value: data.hasOwnProperty('appId') ? data.appId : null
             },
             {
+                trackResetOnLoad: true,
                 xtype: 'textfield',
                 name: 'appSecret',
                 fieldLabel: 'App Secret',
                 allowBlank: false,
                 value: data.hasOwnProperty('appSecret') ? data.appSecret : null
-            }
+            },
+            {
+                xtype: 'button',
+                text: 'Debug Token',
+                iconCls: 'pimcore_icon_open_window',
+                hidden: !data.hasOwnProperty('accessToken') || data.accessToken === null || data.accessToken === '',
+                handler: function () {
+                    Ext.Ajax.request({
+                        url: '/admin/social-data/connector/facebook/debug-token',
+                        method: 'GET',
+                        success: function (response) {
+
+                            var debugWindow,
+                                gridData = [],
+                                res = Ext.decode(response.responseText);
+
+                            if (res.success !== true) {
+                                Ext.MessageBox.alert(t('error'), res.message);
+                                return;
+                            }
+
+                            Ext.Object.each(res.data, function (g, i) {
+                                gridData.push({label: g, value: Ext.encode(i)});
+                            })
+
+                            debugWindow = new Ext.Window({
+                                width: 700,
+                                height: 500,
+                                modal: true,
+                                title: t('Token Debug'),
+                                layout: 'fit',
+                                items: [
+                                    new Ext.grid.GridPanel({
+                                        flex: 1,
+                                        store: new Ext.data.Store({
+                                            fields: ['label', 'value'],
+                                            data: gridData
+                                        }),
+                                        border: true,
+                                        columnLines: true,
+                                        stripeRows: true,
+                                        title: false,
+                                        columns: [
+                                            {
+                                                text: t('label'),
+                                                sortable: false,
+                                                dataIndex: 'label',
+                                                hidden: false,
+                                                flex: 1,
+                                            },
+                                            {
+                                                cellWrap: true,
+                                                text: t('value'),
+                                                sortable: false,
+                                                dataIndex: 'value',
+                                                hidden: false,
+                                                flex: 2
+                                            }
+                                        ]
+                                    })
+                                ]
+                            });
+
+                            debugWindow.show();
+
+                        }.bind(this)
+                    });
+                }.bind(this)
+            },
         ];
     }
 });
