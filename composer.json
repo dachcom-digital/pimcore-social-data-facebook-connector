@@ -24,6 +24,11 @@
             "SocialData\\Connector\\Facebook\\": "src"
         }
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
     "require": {
         "facebook/graph-sdk": "^5.4",
         "dachcom-digital/social-data": "^1.0"

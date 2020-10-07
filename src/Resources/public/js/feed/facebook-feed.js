@@ -35,6 +35,8 @@ SocialData.Feed.Facebook = Class.create(SocialData.Feed.AbstractFeed, {
                 value: this.data !== null ? this.data['limit'] : null,
                 fieldLabel: t('social_data.wall.feed.facebook.limit'),
                 name: 'limit',
+                maxValue: 500,
+                minValue: 0,
                 labelAlign: 'left',
                 anchor: '100%',
                 flex: 1
