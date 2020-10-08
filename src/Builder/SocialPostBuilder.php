@@ -2,6 +2,7 @@
 
 namespace SocialData\Connector\Facebook\Builder;
 
+use Carbon\Carbon;
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\GraphNodes\GraphEdge;
@@ -76,7 +77,6 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $queryBuilder = $fqb
             ->node($feedConfiguration->getPageId())
             ->fields([$posts]);
-
 
         $resolver->setDefaults([
             'facebookQueryBuilder' => $queryBuilder
@@ -186,8 +186,14 @@ class SocialPostBuilder implements SocialPostBuilderInterface
             return;
         }
 
+        if ($element['created_time'] instanceof \DateTime) {
+            $creationTime = Carbon::instance($element['created_time']);
+        } else {
+            $creationTime = Carbon::now();
+        }
+
+        $socialPost->setSocialCreationDate($creationTime);
         $socialPost->setContent($element['message']);
-        $socialPost->setSocialCreationDate($element['created_time']);
         $socialPost->setUrl($element['permalink_url']);
         $socialPost->setPosterUrl($element['full_picture']);
 
