@@ -1,7 +1,6 @@
 # Pimcore Social Data - Facbook Connector
 
-This Connector allows you to fetch social posts from Facebook. 
-Before you start be sure you've checked out the [Setup Instructions](../00_Setup.md).
+This Connector allows you to fetch social posts from Facebook.
 
 ![image](https://user-images.githubusercontent.com/700119/94452916-5f51cb80-01b0-11eb-86b2-026d8b7ef6f7.png)
 
