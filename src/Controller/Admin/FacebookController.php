@@ -8,6 +8,7 @@ use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse;
 use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
+use SocialDataBundle\Connector\ConnectorDefinitionInterface;
 use SocialDataBundle\Controller\Admin\Traits\ConnectResponseTrait;
 use SocialDataBundle\Service\ConnectorServiceInterface;
 use SocialDataBundle\Service\EnvironmentServiceInterface;
@@ -64,20 +65,19 @@ class FacebookController extends AdminController
     public function connectAction(Request $request)
     {
         try {
-            $connectorEngineConfig = $this->getConnectorEngineConfig();
+            $connectorDefinition = $this->getConnectorDefinition();
+            $connectorEngineConfig = $this->getConnectorEngineConfig($connectorDefinition);
         } catch (\Throwable $e) {
             return $this->buildConnectErrorResponse(500, 'general_error', 'connector engine configuration error', $e->getMessage());
         }
 
         $fb = $this->facebookClient->getClient($connectorEngineConfig);
+
         $helper = $fb->getRedirectLoginHelper();
+        $definitionConfiguration = $connectorDefinition->getDefinitionConfiguration();
 
         $callbackUrl = $this->generateUrl('social_data_connector_facebook_connect_check', [], UrlGeneratorInterface::ABSOLUTE_URL);
-
-        // @todo: make this configurable (e.g. via connector config?)
-        $permissions = ['pages_show_list'];
-
-        $loginUrl = $helper->getLoginUrl($callbackUrl, $permissions);
+        $loginUrl = $helper->getLoginUrl($callbackUrl, $definitionConfiguration['api_connect_permission']);
 
         return $this->redirect($loginUrl);
     }
@@ -92,7 +92,7 @@ class FacebookController extends AdminController
     public function checkAction(Request $request)
     {
         try {
-            $connectorEngineConfig = $this->getConnectorEngineConfig();
+            $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
         } catch (\Throwable $e) {
             return $this->buildConnectErrorResponse(500, 'general_error', 'connector engine configuration error', $e->getMessage());
         }
@@ -145,7 +145,7 @@ class FacebookController extends AdminController
     public function debugTokenAction(Request $request)
     {
         try {
-            $connectorEngineConfig = $this->getConnectorEngineConfig();
+            $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
         } catch (\Throwable $e) {
             return $this->adminJson(['error' => true, 'message' => $e->getMessage()]);
         }
@@ -197,9 +197,9 @@ class FacebookController extends AdminController
     }
 
     /**
-     * @return EngineConfiguration
+     * @return ConnectorDefinitionInterface
      */
-    protected function getConnectorEngineConfig()
+    protected function getConnectorDefinition()
     {
         $connectorDefinition = $this->connectorService->getConnectorDefinition('facebook', true);
 
@@ -207,6 +207,16 @@ class FacebookController extends AdminController
             throw new HttpException(400, 'Engine is not loaded.');
         }
 
+        return $connectorDefinition;
+    }
+
+    /**
+     * @param ConnectorDefinitionInterface $connectorDefinition
+     *
+     * @return EngineConfiguration
+     */
+    protected function getConnectorEngineConfig(ConnectorDefinitionInterface $connectorDefinition)
+    {
         $connectorEngineConfig = $connectorDefinition->getEngineConfiguration();
         if (!$connectorEngineConfig instanceof EngineConfiguration) {
             throw new HttpException(400, 'Invalid facebook configuration. Please configure your connector "facebook" in backend first.');

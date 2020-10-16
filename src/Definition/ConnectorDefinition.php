@@ -66,10 +66,10 @@ class ConnectorDefinition implements ConnectorDefinitionInterface
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
-            'core_disabled' => false
+            'api_connect_permission' => ['pages_show_list']
         ]);
 
-        $resolver->setAllowedTypes('core_disabled', 'bool');
+        $resolver->setAllowedTypes('api_connect_permission', 'string[]');
 
         try {
             $this->definitionConfiguration = $resolver->resolve($definitionConfiguration);
@@ -99,10 +99,6 @@ class ConnectorDefinition implements ConnectorDefinitionInterface
      */
     public function isOnline()
     {
-        if ($this->definitionConfiguration['core_disabled'] === true) {
-            return false;
-        }
-
         if (!$this->engineIsLoaded()) {
             return false;
         }
@@ -188,14 +184,6 @@ class ConnectorDefinition implements ConnectorDefinitionInterface
     public function needsEngineConfiguration()
     {
         return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasLogPanel()
-    {
-        return false;
     }
 
     /**
