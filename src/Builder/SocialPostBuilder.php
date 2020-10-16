@@ -64,7 +64,8 @@ class SocialPostBuilder implements SocialPostBuilderInterface
             'permalink_url',
             'created_time',
             'attachments',
-            'status_type'
+            'status_type',
+            'is_published'
         ];
 
         $limit = is_numeric($feedConfiguration->getLimit()) ? $feedConfiguration->getLimit() : 50;
@@ -154,6 +155,10 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $element = $data->getTransferredData();
 
         if (!is_array($element)) {
+            return;
+        }
+
+        if (isset($element['is_published']) && $element['is_published'] === false) {
             return;
         }
 
