@@ -1,6 +1,10 @@
 imports:
     - { resource: 'vendor/symplify/easy-coding-standard/config/set/psr12.yaml' }
 
+parameters:
+    exclude_files:
+        - 'AppBundle/*.php'
+
 services:
     PhpCsFixer\Fixer\Basic\BracesFixer:
         allow_single_line_closure: true
