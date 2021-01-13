@@ -123,4 +123,4 @@ jobs:
                 run: |
                     bin/console cache:warmup --env=test
                     ls -la src
-                    vendor/bin/ecs check src/SocialDataFacebookConnectorBundle --config easy-coding-standard.yml
+                    vendor/bin/ecs check src --config easy-coding-standard.yml
