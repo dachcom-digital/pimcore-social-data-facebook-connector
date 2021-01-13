@@ -7,12 +7,12 @@ use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\GraphNodes\GraphEdge;
 use Facebook\GraphNodes\GraphNode;
-use SocialDataBundle\Dto\BuildConfig;
+use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
 use SocialData\Connector\Facebook\Model\FeedConfiguration;
 use SocialData\Connector\Facebook\QueryBuilder\FacebookQueryBuilder;
-use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialDataBundle\Connector\SocialPostBuilderInterface;
+use SocialDataBundle\Dto\BuildConfig;
 use SocialDataBundle\Dto\FetchData;
 use SocialDataBundle\Dto\FilterData;
 use SocialDataBundle\Dto\TransformData;
@@ -35,7 +35,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function configureFetch(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
@@ -88,7 +88,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function fetch(FetchData $data): void
     {
@@ -137,7 +137,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function configureFilter(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
@@ -145,7 +145,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function filter(FilterData $data): void
     {
@@ -169,7 +169,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function configureTransform(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
@@ -177,7 +177,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function transform(TransformData $data): void
     {

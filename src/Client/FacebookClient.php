@@ -4,8 +4,8 @@ namespace SocialData\Connector\Facebook\Client;
 
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\Facebook as FacebookSDK;
-use SocialData\Connector\Facebook\Session\FacebookDataHandler;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
+use SocialData\Connector\Facebook\Session\FacebookDataHandler;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class FacebookClient

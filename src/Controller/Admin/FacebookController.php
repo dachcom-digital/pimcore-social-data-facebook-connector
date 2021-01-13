@@ -60,6 +60,7 @@ class FacebookController extends AdminController
      * @param Request $request
      *
      * @return RedirectResponse|Response
+     *
      * @throws FacebookSDKException
      */
     public function connectAction(Request $request)
@@ -101,7 +102,6 @@ class FacebookController extends AdminController
         $helper = $fb->getRedirectLoginHelper();
 
         if (!$accessToken = $helper->getAccessToken()) {
-
             if ($helper->getError()) {
                 return $this->buildConnectErrorResponse($helper->getErrorCode(), $helper->getError(), $helper->getErrorReason(), $helper->getErrorDescription());
             }
@@ -168,7 +168,6 @@ class FacebookController extends AdminController
         $normalizedData = $serializer->normalize($accessTokenMetadata, 'array', [
             AbstractNormalizer::CALLBACKS => [
                 'metadata' => function ($data) {
-
                     if (isset($data['expires_at']) && $data['expires_at'] instanceof \DateTime) {
                         $data['expires_at'] = Carbon::parse($data['expires_at'])->toDayDateTimeString();
                     } elseif (isset($data['expires_at']) && $data['expires_at'] === 0) {

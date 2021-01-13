@@ -9,7 +9,7 @@ class SocialDataFacebookConnectorBundle extends AbstractPimcoreBundle
 {
     use PackageVersionTrait;
 
-    const PACKAGE_NAME = 'dachcom-digital/social-data-facebook-connector';
+    public const PACKAGE_NAME = 'dachcom-digital/social-data-facebook-connector';
 
     /**
      * {@inheritdoc}

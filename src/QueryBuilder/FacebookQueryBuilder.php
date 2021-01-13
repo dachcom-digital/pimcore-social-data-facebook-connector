@@ -7,7 +7,7 @@ final class FacebookQueryBuilder
     /**
      * @var GraphNode
      */
-    protected $graphNode;
+    private $graphNode;
 
     /**
      * @param string|null $graphEndpoint

@@ -27,7 +27,7 @@ class FacebookFeedType extends AbstractType
     {
         $resolver->setDefaults([
             'csrf_protection' => false,
-            'data_class' => FeedConfiguration::class
+            'data_class'      => FeedConfiguration::class
         ]);
     }
 }
