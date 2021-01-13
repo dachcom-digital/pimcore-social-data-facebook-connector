@@ -153,7 +153,7 @@ class ConnectorDefinition implements ConnectorDefinitionInterface
         }
 
         $configuration = $this->getConnectorEngine()->getConfiguration();
-        if (!$configuration instanceof ConnectorEngineConfigurationInterface) {
+        if (!$configuration instanceof EngineConfiguration) {
             return false;
         }
 
