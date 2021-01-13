@@ -1,6 +1,6 @@
 bundles:
     - { namespace: \SocialDataBundle\SocialDataBundle }
-    - { namespace: \SocialDataFacebookConnectorBundle\SocialDataFacebookConnectorBundle }
+    - { namespace: \SocialData\Connector\Facebook\SocialDataFacebookConnectorBundle }
 setup_files:
     - { path: app/config.yml, dest: ./app/config/config.yml }
     - { path: app/system.yml, dest: ./var/config/system.yml }
