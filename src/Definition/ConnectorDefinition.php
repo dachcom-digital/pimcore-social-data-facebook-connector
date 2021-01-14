@@ -4,8 +4,8 @@ namespace SocialData\Connector\Facebook\Definition;
 
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
 use SocialData\Connector\Facebook\Model\FeedConfiguration;
-use SocialDataBundle\Connector\ConnectorEngineConfigurationInterface;
 use SocialDataBundle\Connector\ConnectorDefinitionInterface;
+use SocialDataBundle\Connector\ConnectorEngineConfigurationInterface;
 use SocialDataBundle\Connector\SocialPostBuilderInterface;
 use SocialDataBundle\Model\ConnectorEngineInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -153,7 +153,7 @@ class ConnectorDefinition implements ConnectorDefinitionInterface
         }
 
         $configuration = $this->getConnectorEngine()->getConfiguration();
-        if (!$configuration instanceof ConnectorEngineConfigurationInterface) {
+        if (!$configuration instanceof EngineConfiguration) {
             return false;
         }
 

@@ -7,12 +7,12 @@ class GraphNode
     /**
      * @const string
      */
-    const PARAM_FIELDS = 'fields';
+    public const PARAM_FIELDS = 'fields';
 
     /**
      * @const string
      */
-    const PARAM_LIMIT = 'limit';
+    public const PARAM_LIMIT = 'limit';
 
     /**
      * @var string

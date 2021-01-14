@@ -2,8 +2,8 @@
 
 namespace SocialData\Connector\Facebook\Model;
 
-use SocialDataBundle\Connector\ConnectorFeedConfigurationInterface;
 use SocialData\Connector\Facebook\Form\Admin\Type\FacebookFeedType;
+use SocialDataBundle\Connector\ConnectorFeedConfigurationInterface;
 
 class FeedConfiguration implements ConnectorFeedConfigurationInterface
 {

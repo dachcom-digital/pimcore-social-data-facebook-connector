@@ -2,8 +2,8 @@
 
 namespace SocialData\Connector\Facebook\Model;
 
-use SocialDataBundle\Connector\ConnectorEngineConfigurationInterface;
 use SocialData\Connector\Facebook\Form\Admin\Type\FacebookEngineType;
+use SocialDataBundle\Connector\ConnectorEngineConfigurationInterface;
 
 class EngineConfiguration implements ConnectorEngineConfigurationInterface
 {
