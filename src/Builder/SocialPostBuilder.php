@@ -85,36 +85,32 @@ class SocialPostBuilder implements SocialPostBuilderInterface
             return;
         }
 
-        $client = $this->facebookClient->getClient($engineConfiguration);
-
         /** @var FacebookQueryBuilder $fqbRequest */
         $fqbRequest = $options['facebookQueryBuilder'];
 
         $url = $fqbRequest->asEndpoint();
 
         try {
-            $response = $client->get($url, $engineConfiguration->getAccessToken());
-        } catch (FacebookResponseException $e) {
+            $response = $this->facebookClient->makeGraphCall($url, $engineConfiguration);
+        } catch (\Throwable $e) {
             throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $url));
-        } catch (FacebookSDKException $e) {
-            throw new BuildException(sprintf('facebook SDK error: %s [endpoint: %s]', $e->getMessage(), $url));
         }
 
-        $graphEdge = $response->getGraphNode()->getField('posts');
-
-        if (!$graphEdge instanceof GraphEdge) {
+        if (!is_array($response)) {
             return;
         }
 
-        if (count($graphEdge) === 0) {
+        if (!isset($response['posts']['data'])) {
             return;
         }
 
-        $items = [];
+        $items = $response['posts']['data'];
+        if (!is_array($items)) {
+            return;
+        }
 
-        /** @var GraphNode $item */
-        foreach ($graphEdge as $item) {
-            $items[] = $item->asArray();
+        if (count($items) === 0) {
+            return;
         }
 
         $data->setFetchedEntities($items);

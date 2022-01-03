@@ -60,6 +60,17 @@ social_data:
         -   connector_name: facebook
 ```
 
+## Set Cookie SameSite to Lax
+Otherwise, the oauth connection won't work.
+> If you have any hints to allow processing an oauth connection within `strict` mode, 
+> please [tell us](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/issues).
+
+```yaml
+framework:
+    session:
+        cookie_samesite: 'lax'
+```
+
 ## Connector Configuration
 ![image](https://user-images.githubusercontent.com/700119/94451768-164d4780-01af-11eb-9e52-3132ea02d714.png)
 

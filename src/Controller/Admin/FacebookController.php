@@ -3,6 +3,7 @@
 namespace SocialData\Connector\Facebook\Controller\Admin;
 
 use Carbon\Carbon;
+use League\OAuth2\Client\Token\AccessToken;
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse;
 use SocialData\Connector\Facebook\Client\FacebookClient;
@@ -14,11 +15,6 @@ use SocialDataBundle\Service\EnvironmentServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class FacebookController extends AdminController
 {
@@ -28,11 +24,6 @@ class FacebookController extends AdminController
     protected EnvironmentServiceInterface $environmentService;
     protected ConnectorServiceInterface $connectorService;
 
-    /**
-     * @param FacebookClient              $facebookClient
-     * @param EnvironmentServiceInterface $environmentService
-     * @param ConnectorServiceInterface   $connectorService
-     */
     public function __construct(
         FacebookClient $facebookClient,
         EnvironmentServiceInterface $environmentService,
@@ -43,9 +34,6 @@ class FacebookController extends AdminController
         $this->connectorService = $connectorService;
     }
 
-    /**
-     * @throws FacebookSDKException
-     */
     public function connectAction(Request $request): Response
     {
         try {
@@ -55,20 +43,18 @@ class FacebookController extends AdminController
             return $this->buildConnectErrorResponse(500, 'general_error', 'connector engine configuration error', $e->getMessage());
         }
 
-        $fb = $this->facebookClient->getClient($connectorEngineConfig);
-
-        $helper = $fb->getRedirectLoginHelper();
         $definitionConfiguration = $connectorDefinition->getDefinitionConfiguration();
+        $provider = $this->facebookClient->getClient($connectorEngineConfig);
 
-        $callbackUrl = $this->generateUrl('social_data_connector_facebook_connect_check', [], UrlGeneratorInterface::ABSOLUTE_URL);
-        $loginUrl = $helper->getLoginUrl($callbackUrl, $definitionConfiguration['api_connect_permission']);
+        $authUrl = $provider->getAuthorizationUrl([
+            'scope' => $definitionConfiguration['api_connect_permission'],
+        ]);
 
-        return $this->redirect($loginUrl);
+        $request->getSession()->set('FBRLH_oauth2state_social_data', $provider->getState());
+
+        return $this->redirect($authUrl);
     }
 
-    /**
-     * @throws \Exception
-     */
     public function checkAction(Request $request): Response
     {
         try {
@@ -77,39 +63,52 @@ class FacebookController extends AdminController
             return $this->buildConnectErrorResponse(500, 'general_error', 'connector engine configuration error', $e->getMessage());
         }
 
-        $fb = $this->facebookClient->getClient($connectorEngineConfig);
-        $helper = $fb->getRedirectLoginHelper();
+        if (!$request->query->has('state') || $request->query->get('state') !== $request->getSession()->get('FBRLH_oauth2state_social_data')) {
+            return $this->buildConnectErrorResponse(400, 'general_error', 'missing state', 'Required param state missing from persistent data.');
+        }
 
-        if (!$accessToken = $helper->getAccessToken()) {
-            if ($helper->getError()) {
-                return $this->buildConnectErrorResponse($helper->getErrorCode(), $helper->getError(), $helper->getErrorReason(), $helper->getErrorDescription());
+        $provider = $this->facebookClient->getClient($connectorEngineConfig);
+
+        $defaultToken = $provider->getAccessToken('authorization_code', [
+            'code' => $request->query->get('code')
+        ]);
+
+        if (!$defaultToken instanceof AccessToken) {
+            $message = 'Could not generate access token';
+            if ($request->query->has('error_message')) {
+                $message = $request->query->get('error_message');
             }
 
-            return $this->buildConnectErrorResponse(500, 'general_error', 'invalid access token', $request->query->get('error_message', 'Unknown Error'));
+            return $this->buildConnectErrorResponse(500, 'general_error', 'invalid access token', $message);
         }
 
         try {
-            $accessToken = $fb->getOAuth2Client()->getLongLivedAccessToken($accessToken);
-        } catch (FacebookSDKException $e) {
+            $accessToken = $provider->getLongLivedAccessToken($defaultToken);
+        } catch (\Throwable $e) {
             return $this->buildConnectErrorResponse(500, 'general_error', 'long lived access token error', $e->getMessage());
         }
 
+        $connectorEngineConfig->setAccessToken($accessToken->getToken(), true);
+
         try {
             // @todo: really? Dispatch the /me/accounts request to make the user token finally ever lasting.
-            $response = ($fb->get('/me/accounts?fields=access_token', $accessToken->getValue()))->getDecodedBody();
-        } catch (FacebookSDKException $e) {
+            $response = $this->facebookClient->makeCall('/me/accounts?fields=access_token', 'GET', $connectorEngineConfig);
+        } catch (\Throwable $e) {
             // we don't need to fail here.
             // in worst case this means only we don't have a never expiring token
         }
 
-        $accessTokenMetadata = $fb->getOAuth2Client()->debugToken($accessToken->getValue());
-
-        $expiresAt = null;
-        if ($accessTokenMetadata->getExpiresAt() instanceof \DateTime) {
-            $expiresAt = $accessTokenMetadata->getExpiresAt();
+        try {
+            $accessTokenMetadata = $this->facebookClient->makeCall('/debug_token', 'GET', $connectorEngineConfig, ['input_token' => $accessToken->getToken()]);
+        } catch (\Throwable $e) {
+            return $this->buildConnectErrorResponse(500, 'general_error', 'debug token fetch error', $e->getMessage());
         }
 
-        $connectorEngineConfig->setAccessToken($accessToken->getValue(), true);
+        $expiresAt = null;
+        if (is_array($accessTokenMetadata) && isset($accessTokenMetadata['data']['expires_at'])) {
+            $expiresAt = $accessTokenMetadata['data']['expires_at'] === 0 ? null : new \DateTime($accessTokenMetadata['data']['expires_at']);
+        }
+
         $connectorEngineConfig->setAccessTokenExpiresAt($expiresAt, true);
         $this->connectorService->updateConnectorEngineConfiguration('facebook', $connectorEngineConfig);
 
@@ -124,48 +123,43 @@ class FacebookController extends AdminController
             return $this->adminJson(['error' => true, 'message' => $e->getMessage()]);
         }
 
-        $token = $connectorEngineConfig->getAccessToken();
+        $accessToken = $connectorEngineConfig->getAccessToken();
 
-        if (empty($token)) {
+        if (empty($accessToken)) {
             return $this->adminJson(['error' => true, 'message' => 'acccess token is empty']);
         }
 
         try {
-            $fb = $this->facebookClient->getClient($connectorEngineConfig);
-            $accessTokenMetadata = $fb->getOAuth2Client()->debugToken($token);
+            $accessTokenMetadata = $this->facebookClient->makeCall('/debug_token', 'GET', $connectorEngineConfig, ['input_token' => $accessToken]);
         } catch (\Throwable $e) {
             return $this->adminJson(['error' => true, 'message' => $e->getMessage()]);
         }
 
-        $serializer = new Serializer([new PropertyNormalizer(), new ObjectNormalizer()]);
+        $normalizedData = [];
 
-        $normalizedData = $serializer->normalize($accessTokenMetadata, 'array', [
-            AbstractNormalizer::CALLBACKS => [
-                'metadata' => function ($data) {
-                    if (isset($data['expires_at']) && $data['expires_at'] instanceof \DateTime) {
-                        $data['expires_at'] = Carbon::parse($data['expires_at'])->toDayDateTimeString();
-                    } elseif (isset($data['expires_at']) && $data['expires_at'] === 0) {
-                        $data['expires_at'] = 'Never';
-                    }
-
-                    if (isset($data['issued_at']) && $data['issued_at'] instanceof \DateTime) {
-                        $data['issued_at'] = Carbon::parse($data['issued_at'])->toDayDateTimeString();
-                    }
-
-                    if (isset($data['data_access_expires_at']) && !empty($data['data_access_expires_at'])) {
-                        $data['data_access_expires_at'] = Carbon::createFromTimestamp($data['data_access_expires_at'])->toDayDateTimeString();
-                    } elseif (isset($data['data_access_expires_at']) && $data['data_access_expires_at'] === 0) {
-                        $data['data_access_expires_at'] = 'Never';
-                    }
-
-                    return $data;
+        if (is_array($accessTokenMetadata) && isset($accessTokenMetadata['data'])) {
+            foreach ($accessTokenMetadata['data'] as $rowKey => $rowValue) {
+                switch ($rowKey) {
+                    case 'expires_at':
+                    case 'data_access_expires_at':
+                        if ($rowValue === 0) {
+                            $normalizedData[$rowKey] = 'Never';
+                        } else {
+                            $normalizedData[$rowKey] = Carbon::parse($rowValue)->toDayDateTimeString();
+                        }
+                        break;
+                    case 'issued_at':
+                        $normalizedData[$rowKey] = Carbon::parse($rowValue)->toDayDateTimeString();
+                        break;
+                    default:
+                        $normalizedData[$rowKey] = $rowValue;
                 }
-            ]
-        ]);
+            }
+        }
 
         return $this->adminJson([
             'success' => true,
-            'data'    => isset($normalizedData['metadata']) ? $normalizedData['metadata'] : []
+            'data'    => $normalizedData
         ]);
     }
 
