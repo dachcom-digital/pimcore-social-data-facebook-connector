@@ -3,10 +3,6 @@
 namespace SocialData\Connector\Facebook\Builder;
 
 use Carbon\Carbon;
-use Facebook\Exceptions\FacebookResponseException;
-use Facebook\Exceptions\FacebookSDKException;
-use Facebook\GraphNodes\GraphEdge;
-use Facebook\GraphNodes\GraphNode;
 use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
 use SocialData\Connector\Facebook\Model\FeedConfiguration;
@@ -21,22 +17,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SocialPostBuilder implements SocialPostBuilderInterface
 {
-    /**
-     * @var FacebookClient
-     */
-    protected $facebookClient;
+    protected FacebookClient $facebookClient;
 
-    /**
-     * @param FacebookClient $facebookClient
-     */
     public function __construct(FacebookClient $facebookClient)
     {
         $this->facebookClient = $facebookClient;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureFetch(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
         $engineConfiguration = $buildConfig->getEngineConfiguration();
@@ -87,9 +74,6 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $resolver->addAllowedTypes('facebookQueryBuilder', [FacebookQueryBuilder::class]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function fetch(FetchData $data): void
     {
         $options = $data->getOptions();
@@ -136,17 +120,11 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $data->setFetchedEntities($items);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureFilter(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
         // nothing to configure so far.
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function filter(FilterData $data): void
     {
         $options = $data->getOptions();
@@ -168,17 +146,11 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $data->setFilteredId($element['id']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureTransform(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
         // nothing to configure so far.
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(TransformData $data): void
     {
         $options = $data->getOptions();

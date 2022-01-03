@@ -4,10 +4,7 @@ namespace SocialData\Connector\Facebook\QueryBuilder;
 
 class GraphEdge extends GraphNode
 {
-    /**
-     * @return array
-     */
-    public function toEndpoints()
+    public function toEndpoints(): array
     {
         $endpoints = [];
 
@@ -19,10 +16,7 @@ class GraphEdge extends GraphNode
         return $endpoints;
     }
 
-    /**
-     * @return array
-     */
-    public function getChildEdges()
+    public function getChildEdges(): array
     {
         $edges = [];
         $hasChildren = false;
@@ -45,7 +39,7 @@ class GraphEdge extends GraphNode
         return $edges;
     }
 
-    public function compileModifiers()
+    public function compileModifiers(): void
     {
         if (count($this->modifiers) === 0) {
             return;
@@ -60,7 +54,7 @@ class GraphEdge extends GraphNode
         $this->compiledValues[] = sprintf('.%s', implode('.', $processed_modifiers));
     }
 
-    public function compileFields()
+    public function compileFields(): void
     {
         if (count($this->fields) === 0) {
             return;
@@ -75,10 +69,7 @@ class GraphEdge extends GraphNode
         $this->compiledValues[] = sprintf('{%s}', implode(',', $processed_fields));
     }
 
-    /**
-     * @return string
-     */
-    public function compileUrl()
+    public function compileUrl(): string
     {
         $append = '';
 

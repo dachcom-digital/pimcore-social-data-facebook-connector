@@ -3,7 +3,6 @@
 namespace SocialData\Connector\Facebook\Controller\Admin;
 
 use Carbon\Carbon;
-use Facebook\Exceptions\FacebookSDKException;
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse;
 use SocialData\Connector\Facebook\Client\FacebookClient;
@@ -12,7 +11,6 @@ use SocialDataBundle\Connector\ConnectorDefinitionInterface;
 use SocialDataBundle\Controller\Admin\Traits\ConnectResponseTrait;
 use SocialDataBundle\Service\ConnectorServiceInterface;
 use SocialDataBundle\Service\EnvironmentServiceInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -26,20 +24,9 @@ class FacebookController extends AdminController
 {
     use ConnectResponseTrait;
 
-    /**
-     * @var FacebookClient
-     */
-    protected $facebookClient;
-
-    /**
-     * @var EnvironmentServiceInterface
-     */
-    protected $environmentService;
-
-    /**
-     * @var ConnectorServiceInterface
-     */
-    protected $connectorService;
+    protected FacebookClient $facebookClient;
+    protected EnvironmentServiceInterface $environmentService;
+    protected ConnectorServiceInterface $connectorService;
 
     /**
      * @param FacebookClient              $facebookClient
@@ -57,13 +44,9 @@ class FacebookController extends AdminController
     }
 
     /**
-     * @param Request $request
-     *
-     * @return RedirectResponse|Response
-     *
      * @throws FacebookSDKException
      */
-    public function connectAction(Request $request)
+    public function connectAction(Request $request): Response
     {
         try {
             $connectorDefinition = $this->getConnectorDefinition();
@@ -84,13 +67,9 @@ class FacebookController extends AdminController
     }
 
     /**
-     * @param Request $request
-     *
-     * @return Response
-     *
      * @throws \Exception
      */
-    public function checkAction(Request $request)
+    public function checkAction(Request $request): Response
     {
         try {
             $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
@@ -137,12 +116,7 @@ class FacebookController extends AdminController
         return $this->buildConnectSuccessResponse();
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function debugTokenAction(Request $request)
+    public function debugTokenAction(Request $request): JsonResponse
     {
         try {
             $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
@@ -195,10 +169,7 @@ class FacebookController extends AdminController
         ]);
     }
 
-    /**
-     * @return ConnectorDefinitionInterface
-     */
-    protected function getConnectorDefinition()
+    protected function getConnectorDefinition(): ConnectorDefinitionInterface
     {
         $connectorDefinition = $this->connectorService->getConnectorDefinition('facebook', true);
 
@@ -209,12 +180,7 @@ class FacebookController extends AdminController
         return $connectorDefinition;
     }
 
-    /**
-     * @param ConnectorDefinitionInterface $connectorDefinition
-     *
-     * @return EngineConfiguration
-     */
-    protected function getConnectorEngineConfig(ConnectorDefinitionInterface $connectorDefinition)
+    protected function getConnectorEngineConfig(ConnectorDefinitionInterface $connectorDefinition): EngineConfiguration
     {
         $connectorEngineConfig = $connectorDefinition->getEngineConfiguration();
         if (!$connectorEngineConfig instanceof EngineConfiguration) {

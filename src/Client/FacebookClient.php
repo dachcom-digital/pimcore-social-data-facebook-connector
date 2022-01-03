@@ -2,41 +2,32 @@
 
 namespace SocialData\Connector\Facebook\Client;
 
-use Facebook\Exceptions\FacebookSDKException;
-use Facebook\Facebook as FacebookSDK;
+use League\OAuth2\Client\Provider\Facebook;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
-use SocialData\Connector\Facebook\Session\FacebookDataHandler;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 class FacebookClient
 {
-    /**
-     * @var SessionInterface
-     */
-    protected $session;
+    protected RouterInterface $router;
 
-    /**
-     * @param SessionInterface $session
-     */
-    public function __construct(SessionInterface $session)
+    public function __construct(RouterInterface $router)
     {
-        $this->session = $session;
+        $this->router = $router;
     }
 
-    /**
-     * @param EngineConfiguration $configuration
-     *
-     * @return FacebookSDK
-     *
-     * @throws FacebookSDKException
-     */
-    public function getClient(EngineConfiguration $configuration)
+    public function getClient(EngineConfiguration $configuration): Facebook
     {
-        return new FacebookSDK([
-            'app_id'                  => $configuration->getAppId(),
-            'app_secret'              => $configuration->getAppSecret(),
-            'persistent_data_handler' => new FacebookDataHandler($this->session),
-            'default_graph_version'   => 'v8.0'
+        return new Facebook([
+            'clientId'        => $configuration->getAppId(),
+            'clientSecret'    => $configuration->getAppSecret(),
+            'redirectUri'     => $this->generateRedirectUri(),
+            'graphApiVersion' => 'v2.10',
         ]);
+    }
+
+    protected function generateRedirectUri(): string
+    {
+        return $this->router->generate('social_data_connector_facebook_connect_check', UrlGeneratorInterface::ABSOLUTE_URL);
     }
 }

@@ -4,42 +4,15 @@ namespace SocialData\Connector\Facebook\QueryBuilder;
 
 class GraphNode
 {
-    /**
-     * @const string
-     */
     public const PARAM_FIELDS = 'fields';
-
-    /**
-     * @const string
-     */
     public const PARAM_LIMIT = 'limit';
 
-    /**
-     * @var string
-     */
-    protected $name;
+    protected string $name;
+    protected array $modifiers = [];
+    protected array $fields = [];
+    protected array $compiledValues = [];
 
-    /**
-     * @var array
-     */
-    protected $modifiers = [];
-
-    /**
-     * @var array
-     */
-    protected $fields = [];
-
-    /**
-     * @var array
-     */
-    protected $compiledValues = [];
-
-    /**
-     * @param string $name
-     * @param array  $fields
-     * @param int    $limit
-     */
-    public function __construct($name, $fields = [], $limit = 0)
+    public function __construct(string $name, array $fields = [], int $limit = 0)
     {
         $this->name = $name;
 
@@ -50,62 +23,36 @@ class GraphNode
         }
     }
 
-    /**
-     * @param array $data
-     *
-     * @return GraphNode
-     */
-    public function modifiers(array $data)
+    public function modifiers(array $data): GraphNode
     {
         $this->modifiers = array_merge($this->modifiers, $data);
 
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getModifiers()
+    public function getModifiers(): array
     {
         return $this->modifiers;
     }
 
-    /**
-     * @param string $key
-     *
-     * @return mixed|null
-     */
-    public function getModifier($key)
+    public function getModifier(string $key): mixed
     {
-        return isset($this->modifiers[$key]) ? $this->modifiers[$key] : null;
+        return $this->modifiers[$key] ?? null;
     }
 
-    /**
-     * @param int $limit
-     *
-     * @return GraphNode
-     */
-    public function limit($limit)
+    public function limit(int $limit): GraphNode
     {
         return $this->modifiers([
             static::PARAM_LIMIT => $limit,
         ]);
     }
 
-    /**
-     * @return int|null
-     */
-    public function getLimit()
+    public function getLimit(): ?int
     {
         return $this->getModifier(static::PARAM_LIMIT);
     }
 
-    /**
-     * @param mixed $fields
-     *
-     * @return GraphNode
-     */
-    public function fields($fields)
+    public function fields(mixed $fields): GraphNode
     {
         if (!is_array($fields)) {
             $fields = func_get_args();
@@ -116,20 +63,17 @@ class GraphNode
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getFields()
+    public function getFields(): array
     {
         return $this->fields;
     }
 
-    public function resetCompiledValues()
+    public function resetCompiledValues(): void
     {
         $this->compiledValues = [];
     }
 
-    public function compileModifiers()
+    public function compileModifiers(): void
     {
         if (count($this->modifiers) === 0) {
             return;
@@ -138,7 +82,7 @@ class GraphNode
         $this->compiledValues[] = http_build_query($this->modifiers, '', '&');
     }
 
-    public function compileFields()
+    public function compileFields(): void
     {
         if (count($this->fields) === 0) {
             return;
@@ -147,10 +91,7 @@ class GraphNode
         $this->compiledValues[] = sprintf('%s=%s', static::PARAM_FIELDS, implode(',', $this->fields));
     }
 
-    /**
-     * @return string
-     */
-    public function compileUrl()
+    public function compileUrl(): string
     {
         $append = '';
         if (count($this->compiledValues) > 0) {
@@ -160,10 +101,7 @@ class GraphNode
         return sprintf('/%s%s', $this->name, $append);
     }
 
-    /**
-     * @return string
-     */
-    public function asUrl()
+    public function asUrl(): string
     {
         $this->resetCompiledValues();
         $this->compileModifiers();
@@ -172,10 +110,7 @@ class GraphNode
         return $this->compileUrl();
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->asUrl();
     }
