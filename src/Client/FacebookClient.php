@@ -48,7 +48,7 @@ class FacebookClient
             $params['form_params'] = $formParams;
         }
 
-        $response = $client->request($method, $endpoint, $params);
+        $response = $client->request($method, ltrim($endpoint, '/'), $params);
 
         return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
     }
@@ -62,7 +62,7 @@ class FacebookClient
 
         $endpoint = sprintf(
             '%s&access_token=%s&appsecret_proof=%s',
-            $query,
+            ltrim($query, '/'),
             $configuration->getAccessToken(),
             hash_hmac('sha256', $configuration->getAccessToken(), $configuration->getAppSecret())
         );
@@ -78,7 +78,7 @@ class FacebookClient
     protected function getGuzzleClient(): Client
     {
         return new Client([
-            'base_uri' => sprintf('https://graph.facebook.com/%s', self::GRAPH_VERSION)
+            'base_uri' => sprintf('https://graph.facebook.com/%s/', self::GRAPH_VERSION)
         ]);
     }
 

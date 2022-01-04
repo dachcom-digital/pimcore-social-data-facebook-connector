@@ -78,7 +78,6 @@ class SocialPostBuilder implements SocialPostBuilderInterface
     {
         $options = $data->getOptions();
         $buildConfig = $data->getBuildConfig();
-
         $engineConfiguration = $buildConfig->getEngineConfiguration();
 
         if (!$engineConfiguration instanceof EngineConfiguration) {
@@ -87,13 +86,12 @@ class SocialPostBuilder implements SocialPostBuilderInterface
 
         /** @var FacebookQueryBuilder $fqbRequest */
         $fqbRequest = $options['facebookQueryBuilder'];
-
-        $url = $fqbRequest->asEndpoint();
+        $query = $fqbRequest->asEndpoint();
 
         try {
-            $response = $this->facebookClient->makeGraphCall($url, $engineConfiguration);
+            $response = $this->facebookClient->makeGraphCall($query, $engineConfiguration);
         } catch (\Throwable $e) {
-            throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $url));
+            throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $query));
         }
 
         if (!is_array($response)) {

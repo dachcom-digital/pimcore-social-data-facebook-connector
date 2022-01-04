@@ -69,9 +69,11 @@ class FacebookController extends AdminController
 
         $provider = $this->facebookClient->getClient($connectorEngineConfig);
 
-        $defaultToken = $provider->getAccessToken('authorization_code', [
-            'code' => $request->query->get('code')
-        ]);
+        try {
+            $defaultToken = $provider->getAccessToken('authorization_code', ['code' => $request->query->get('code')]);
+        } catch (\Throwable $e) {
+            return $this->buildConnectErrorResponse(500, 'general_error', 'token access error', $e->getMessage());
+        }
 
         if (!$defaultToken instanceof AccessToken) {
             $message = 'Could not generate access token';
@@ -106,7 +108,7 @@ class FacebookController extends AdminController
 
         $expiresAt = null;
         if (is_array($accessTokenMetadata) && isset($accessTokenMetadata['data']['expires_at'])) {
-            $expiresAt = $accessTokenMetadata['data']['expires_at'] === 0 ? null : new \DateTime($accessTokenMetadata['data']['expires_at']);
+            $expiresAt = $accessTokenMetadata['data']['expires_at'] === 0 ? null : \DateTime::createFromFormat('U', $accessTokenMetadata['data']['expires_at']);
         }
 
         $connectorEngineConfig->setAccessTokenExpiresAt($expiresAt, true);

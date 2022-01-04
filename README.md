@@ -15,7 +15,6 @@ This Connector allows you to fetch social posts from Facebook.
 | **2.x** | `10.1` - `10.2`                   | `5.4`                      | --           | Feature Branch | master     |
 | **1.x** | `6.0` - `6.9`                     | `3.4`, `^4.4`              | 22.10.2020   | Unsupported    | 1.x        |
 
-
 ## Installation
 
 ### I. Add Dependency
@@ -47,10 +46,6 @@ class Kernel extends \Pimcore\Kernel
 bin/console assets:install public --relative --symlink
 ```
 
-## Third-Party Requirements
-To use this connector, this bundle requires some additional packages which will be also installed with this bundle:
-- [league/oauth2-facebook](https://github.com/thephpleague/oauth2-facebook)
-
 ## Enable Connector
 ```yaml
 # app/config/config.yml
@@ -60,7 +55,7 @@ social_data:
         -   connector_name: facebook
 ```
 
-## Set Cookie SameSite to Lax
+### Set Cookie SameSite to Lax
 Otherwise, the oauth connection won't work.
 > If you have any hints to allow processing an oauth connection within `strict` mode, 
 > please [tell us](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/issues).
@@ -70,6 +65,10 @@ framework:
     session:
         cookie_samesite: 'lax'
 ```
+
+## Facebook Backoffice
+First, you need to create a facebook app.
+Add `https://YOURDOMAIN/admin/social-data/connector/facebook/check` to the `Valid OAuth Redirect URIs` in facebook backoffice.
 
 ## Connector Configuration
 ![image](https://user-images.githubusercontent.com/700119/94451768-164d4780-01af-11eb-9e52-3132ea02d714.png)
@@ -107,6 +106,10 @@ social_data:
             connector_config:
                 api_connect_permission: ['pages_show_list'] # default value
 ```
+
+## Third-Party Requirements
+To use this connector, this bundle requires some additional packages which will be also installed with this bundle:
+- [league/oauth2-facebook](https://github.com/thephpleague/oauth2-facebook)
 
 ***
 
