@@ -4,48 +4,26 @@ namespace SocialData\Connector\Facebook\QueryBuilder;
 
 final class FacebookQueryBuilder
 {
-    /**
-     * @var GraphNode
-     */
-    private $graphNode;
+    private GraphNode $graphNode;
 
-    /**
-     * @param string|null $graphEndpoint
-     */
-    public function __construct($graphEndpoint = '')
+    public function __construct(?string $graphEndpoint = '')
     {
         if (isset($graphEndpoint)) {
             $this->graphNode = new GraphNode($graphEndpoint);
         }
     }
 
-    /**
-     * @param string $graphNodeName
-     *
-     * @return FacebookQueryBuilder
-     */
-    public function node($graphNodeName)
+    public function node(string $graphNodeName): FacebookQueryBuilder
     {
-        return new static($graphNodeName);
+        return new FacebookQueryBuilder($graphNodeName);
     }
 
-    /**
-     * @param string $edgeName
-     * @param array  $fields
-     *
-     * @return GraphEdge
-     */
-    public function edge($edgeName, array $fields = [])
+    public function edge(string $edgeName, array $fields = []): GraphEdge
     {
         return new GraphEdge($edgeName, $fields);
     }
 
-    /**
-     * @param array|string $fields
-     *
-     * @return FacebookQueryBuilder
-     */
-    public function fields($fields)
+    public function fields(mixed $fields): FacebookQueryBuilder
     {
         if (!is_array($fields)) {
             $fields = func_get_args();
@@ -56,42 +34,26 @@ final class FacebookQueryBuilder
         return $this;
     }
 
-    /**
-     * @param int $limit
-     *
-     * @return FacebookQueryBuilder
-     */
-    public function limit($limit)
+    public function limit(int $limit): FacebookQueryBuilder
     {
         $this->graphNode->limit($limit);
 
         return $this;
     }
 
-    /**
-     * @param array $data
-     *
-     * @return FacebookQueryBuilder
-     */
-    public function modifiers(array $data)
+    public function modifiers(array $data): FacebookQueryBuilder
     {
         $this->graphNode->modifiers($data);
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function asEndpoint()
+    public function asEndpoint(): string
     {
         return $this->graphNode->asUrl();
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->asEndpoint();
     }

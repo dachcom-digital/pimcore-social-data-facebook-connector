@@ -3,10 +3,6 @@
 namespace SocialData\Connector\Facebook\Builder;
 
 use Carbon\Carbon;
-use Facebook\Exceptions\FacebookResponseException;
-use Facebook\Exceptions\FacebookSDKException;
-use Facebook\GraphNodes\GraphEdge;
-use Facebook\GraphNodes\GraphNode;
 use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
 use SocialData\Connector\Facebook\Model\FeedConfiguration;
@@ -21,22 +17,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SocialPostBuilder implements SocialPostBuilderInterface
 {
-    /**
-     * @var FacebookClient
-     */
-    protected $facebookClient;
+    protected FacebookClient $facebookClient;
 
-    /**
-     * @param FacebookClient $facebookClient
-     */
     public function __construct(FacebookClient $facebookClient)
     {
         $this->facebookClient = $facebookClient;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureFetch(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
         $engineConfiguration = $buildConfig->getEngineConfiguration();
@@ -87,66 +74,51 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $resolver->addAllowedTypes('facebookQueryBuilder', [FacebookQueryBuilder::class]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function fetch(FetchData $data): void
     {
         $options = $data->getOptions();
         $buildConfig = $data->getBuildConfig();
-
         $engineConfiguration = $buildConfig->getEngineConfiguration();
 
         if (!$engineConfiguration instanceof EngineConfiguration) {
             return;
         }
 
-        $client = $this->facebookClient->getClient($engineConfiguration);
-
         /** @var FacebookQueryBuilder $fqbRequest */
         $fqbRequest = $options['facebookQueryBuilder'];
-
-        $url = $fqbRequest->asEndpoint();
+        $query = $fqbRequest->asEndpoint();
 
         try {
-            $response = $client->get($url, $engineConfiguration->getAccessToken());
-        } catch (FacebookResponseException $e) {
-            throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $url));
-        } catch (FacebookSDKException $e) {
-            throw new BuildException(sprintf('facebook SDK error: %s [endpoint: %s]', $e->getMessage(), $url));
+            $response = $this->facebookClient->makeGraphCall($query, $engineConfiguration);
+        } catch (\Throwable $e) {
+            throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $query));
         }
 
-        $graphEdge = $response->getGraphNode()->getField('posts');
-
-        if (!$graphEdge instanceof GraphEdge) {
+        if (!is_array($response)) {
             return;
         }
 
-        if (count($graphEdge) === 0) {
+        if (!isset($response['posts']['data'])) {
             return;
         }
 
-        $items = [];
+        $items = $response['posts']['data'];
+        if (!is_array($items)) {
+            return;
+        }
 
-        /** @var GraphNode $item */
-        foreach ($graphEdge as $item) {
-            $items[] = $item->asArray();
+        if (count($items) === 0) {
+            return;
         }
 
         $data->setFetchedEntities($items);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureFilter(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
         // nothing to configure so far.
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function filter(FilterData $data): void
     {
         $options = $data->getOptions();
@@ -168,17 +140,11 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $data->setFilteredId($element['id']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureTransform(BuildConfig $buildConfig, OptionsResolver $resolver): void
     {
         // nothing to configure so far.
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function transform(TransformData $data): void
     {
         $options = $data->getOptions();

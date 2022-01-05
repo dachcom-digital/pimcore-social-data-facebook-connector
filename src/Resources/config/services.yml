@@ -36,5 +36,4 @@ services:
     ## Controller
 
     SocialData\Connector\Facebook\Controller\Admin\FacebookController:
-        calls:
-            - [setContainer, ['@service_container']]
+        tags: [ 'controller.service_arguments' ]

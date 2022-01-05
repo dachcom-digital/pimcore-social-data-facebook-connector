@@ -10,10 +10,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FacebookEngineType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('accessToken', TextType::class);
         $builder->add('accessTokenExpiresAt', TextType::class, ['required' => false]);
@@ -21,10 +18,7 @@ class FacebookEngineType extends AbstractType
         $builder->add('appSecret', TextType::class);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'csrf_protection' => false,

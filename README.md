@@ -1,33 +1,38 @@
-# Pimcore Social Data - Facbook Connector
+# Pimcore Social Data - Facebook Connector
 
 [![Software License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Latest Release](https://img.shields.io/packagist/v/dachcom-digital/social-data-facebook-connector.svg?style=flat-square)](https://packagist.org/packages/dachcom-digital/social-data-facebook-connector)
-[![Tests](https://img.shields.io/github/workflow/status/dachcom-digital/pimcore-social-data-facebook-connector/Codeception?style=flat-square&logo=github&label=codeception)](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/actions?query=workflow%3A%22Codeception%22)
-[![PhpStan](https://img.shields.io/github/workflow/status/dachcom-digital/pimcore-social-data-facebook-connector/PHP%20Stan?style=flat-square&logo=github&label=phpstan%20level%202)](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/actions?query=workflow%3A%22PHP%20Stan%22)
+[![Tests](https://img.shields.io/github/workflow/status/dachcom-digital/pimcore-social-data-facebook-connector/Codeception/master?style=flat-square&logo=github&label=codeception)](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/actions?query=workflow%3ACodeception+branch%3Amaster)
+[![PhpStan](https://img.shields.io/github/workflow/status/dachcom-digital/pimcore-social-data-facebook-connector/PHP%20Stan/master?style=flat-square&logo=github&label=phpstan%20level%204)](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/actions?query=workflow%3A"PHP+Stan"+branch%3Amaster)
 
 This Connector allows you to fetch social posts from Facebook.
 
 ![image](https://user-images.githubusercontent.com/700119/94452916-5f51cb80-01b0-11eb-86b2-026d8b7ef6f7.png)
 
-#### Requirements
-* [Pimcore Social Data Bundle](https://github.com/dachcom-digital/pimcore-social-data)
+### Release Plan
+| Release | Supported Pimcore Versions        | Supported Symfony Versions | Release Date | Maintained     | Branch     |
+|---------|-----------------------------------|----------------------------|--------------|----------------|------------|
+| **2.x** | `10.1` - `10.2`                   | `5.4`                      | --           | Feature Branch | master     |
+| **1.x** | `6.0` - `6.9`                     | `3.4`, `^4.4`              | 22.10.2020   | Unsupported    | 1.x        |
 
 ## Installation
 
 ### I. Add Dependency
 ```json
 "require" : {
-    "dachcom-digital/social-data-facebook-connector" : "~1.0.0",
+    "dachcom-digital/social-data" : "~2.0.0",
+    "dachcom-digital/social-data-facebook-connector" : "~2.0.0",
 }
 ```
 
 ### II. Register Connector Bundle
 ```php
-// src/AppKernel.php
-use Pimcore\Kernel;
+// src/Kernel.php
+namespace App;
+
 use Pimcore\HttpKernel\BundleCollection\BundleCollection;
 
-class AppKernel extends Kernel
+class Kernel extends \Pimcore\Kernel
 {
     public function registerBundlesToCollection(BundleCollection $collection)
     {
@@ -38,15 +43,10 @@ class AppKernel extends Kernel
 
 ### III. Install Assets
 ```bash
-bin/console assets:install web --relative --symlink
+bin/console assets:install public --relative --symlink
 ```
 
-## Third-Party Requirements
-To use this connector, this bundle requires some additional packages:
-- [facebook/graph-sdk](https://github.com/facebookarchive/php-graph-sdk/blob/5.x/README.md) (Mostly already installed within a Pimcore Installation)
-
 ## Enable Connector
-
 ```yaml
 # app/config/config.yml
 social_data:
@@ -54,6 +54,21 @@ social_data:
     available_connectors:
         -   connector_name: facebook
 ```
+
+### Set Cookie SameSite to Lax
+Otherwise, the oauth connection won't work.
+> If you have any hints to allow processing an oauth connection within `strict` mode, 
+> please [tell us](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/issues).
+
+```yaml
+framework:
+    session:
+        cookie_samesite: 'lax'
+```
+
+## Facebook Backoffice
+First, you need to create a facebook app.
+Add `https://YOURDOMAIN/admin/social-data/connector/facebook/check` to the `Valid OAuth Redirect URIs` in facebook backoffice.
 
 ## Connector Configuration
 ![image](https://user-images.githubusercontent.com/700119/94451768-164d4780-01af-11eb-9e52-3132ea02d714.png)
@@ -91,7 +106,6 @@ social_data:
             connector_config:
                 api_connect_permission: ['pages_show_list'] # default value
 ```
-
 ***
 
 ## Copyright and license

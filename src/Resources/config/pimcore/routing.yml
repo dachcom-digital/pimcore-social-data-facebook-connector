@@ -1,4 +1,3 @@
-
 social_data_connector_facebook_connect:
     path: /admin/social-data/connector/facebook/connect
     defaults: { _controller: SocialData\Connector\Facebook\Controller\Admin\FacebookController::connectAction }

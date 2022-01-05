@@ -7,52 +7,30 @@ use SocialDataBundle\Connector\ConnectorFeedConfigurationInterface;
 
 class FeedConfiguration implements ConnectorFeedConfigurationInterface
 {
-    /**
-     * @var string|null
-     */
-    protected $pageId;
+    protected ?string $pageId = null;
+    protected ?int $limit = null;
 
-    /**
-     * @var int
-     */
-    protected $limit;
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function getFormClass()
+    public static function getFormClass(): string
     {
         return FacebookFeedType::class;
     }
 
-    /**
-     * @param string|null $pageId
-     */
-    public function setPageId(?string $pageId)
+    public function setPageId(?string $pageId): void
     {
         $this->pageId = $pageId;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getPageId()
+    public function getPageId(): ?string
     {
         return $this->pageId;
     }
 
-    /**
-     * @param int|null $limit
-     */
-    public function setLimit(?int $limit)
+    public function setLimit(?int $limit): void
     {
         $this->limit = $limit;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getLimit()
+    public function getLimit(): ?int
     {
         return $this->limit;
     }
