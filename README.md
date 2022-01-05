@@ -106,11 +106,6 @@ social_data:
             connector_config:
                 api_connect_permission: ['pages_show_list'] # default value
 ```
-
-## Third-Party Requirements
-To use this connector, this bundle requires some additional packages which will be also installed with this bundle:
-- [league/oauth2-facebook](https://github.com/thephpleague/oauth2-facebook)
-
 ***
 
 ## Copyright and license
