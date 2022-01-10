@@ -48,7 +48,7 @@ bin/console assets:install public --relative --symlink
 
 ## Enable Connector
 ```yaml
-# app/config/config.yml
+# config/packages/social_data.yaml
 social_data:
     social_post_data_class: SocialPost
     available_connectors:
@@ -99,7 +99,7 @@ Normally you don't need to modify connector (`connector_config`) configuration, 
 However, if you need to change some core setting of a connector, you're able to change them of course.
 
 ```yaml
-# app/config/config.yml
+# config/packages/social_data.yaml
 social_data:
     available_connectors:
         -   connector_name: facebook
