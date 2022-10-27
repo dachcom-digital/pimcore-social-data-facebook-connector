@@ -1,5 +1,8 @@
 # Upgrade Notes
 
+## 2.1.0
+- [BUGFIX] Use Page Access Token [#6](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/issues/6)
+
 ## Migrating from Version 1.x to Version 2.0.0
 
 ### Global Changes

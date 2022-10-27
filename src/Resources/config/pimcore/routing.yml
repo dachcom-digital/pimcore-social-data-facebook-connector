@@ -9,3 +9,7 @@ social_data_connector_facebook_connect_check:
 social_data_connector_facebook_debug_token:
     path: /admin/social-data/connector/facebook/debug-token
     defaults: { _controller: SocialData\Connector\Facebook\Controller\Admin\FacebookController::debugTokenAction }
+
+social_data_connector_facebook_feed_config:
+    path: /admin/social-data/connector/facebook/feed-config
+    defaults: { _controller: SocialData\Connector\Facebook\Controller\Admin\FacebookController::feedConfigAction }

@@ -112,20 +112,63 @@ class FacebookController extends AdminController
         }
 
         $connectorEngineConfig->setAccessTokenExpiresAt($expiresAt, true);
+
+        // now set page tokens
+        $pageTokens = $this->facebookClient->makeCall('/me/accounts?fields=name,access_token', 'GET', $connectorEngineConfig);
+
+        $pages = [];
+        foreach ($pageTokens['data'] ?? [] as $page) {
+            $pages[] = [
+                'id'          => $page['id'] ?? null,
+                'name'        => $page['name'] ?? null,
+                'accessToken' => $page['access_token'] ?? null,
+            ];
+        }
+
+        $connectorEngineConfig->setPages($pages);
+
         $this->connectorService->updateConnectorEngineConfiguration('facebook', $connectorEngineConfig);
 
         return $this->buildConnectSuccessResponse();
     }
 
-    public function debugTokenAction(Request $request): JsonResponse
+    public function feedConfigAction(Request $request): JsonResponse
     {
+        $feedConfig = [];
+
         try {
             $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
         } catch (\Throwable $e) {
             return $this->adminJson(['error' => true, 'message' => $e->getMessage()]);
         }
 
-        $accessToken = $connectorEngineConfig->getAccessToken();
+        if ($connectorEngineConfig->hasPages()) {
+            $feedConfig['pages'] = array_values(array_map(static function (array $page) {
+                return ['key' => $page['name'] ?? $page['id'], 'value' => $page['id']];
+            }, $connectorEngineConfig->getPages()));
+        }
+
+        return $this->adminJson([
+            'success' => true,
+            'data'    => $feedConfig
+        ]);
+    }
+
+    public function debugTokenAction(Request $request): JsonResponse
+    {
+        $pageId = $request->query->get('pageId', null);
+
+        try {
+            $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
+        } catch (\Throwable $e) {
+            return $this->adminJson(['error' => true, 'message' => $e->getMessage()]);
+        }
+
+        if ($pageId !== null && $connectorEngineConfig->hasPages()) {
+            $accessToken = $connectorEngineConfig->getPageConfig($pageId, 'accessToken');
+        } else {
+            $accessToken = $connectorEngineConfig->getAccessToken();
+        }
 
         if (empty($accessToken)) {
             return $this->adminJson(['error' => true, 'message' => 'acccess token is empty']);
