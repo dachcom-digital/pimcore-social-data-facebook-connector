@@ -56,15 +56,22 @@ class FacebookClient
     /**
      * @throws \Exception|GuzzleException
      */
-    public function makeGraphCall(string $query, EngineConfiguration $configuration): array
+    public function makeGraphCall(string $query, EngineConfiguration $configuration, string|int $pageId = null): array
     {
         $client = $this->getGuzzleClient();
+
+        $accessToken = $configuration->getAccessToken();
+
+        if ($pageId !== null) {
+            $pageAccessToken = $configuration->getPageConfig($pageId, 'accessToken');
+            $accessToken = $pageAccessToken ?? $accessToken;
+        }
 
         $endpoint = sprintf(
             '%s&access_token=%s&appsecret_proof=%s',
             ltrim($query, '/'),
-            $configuration->getAccessToken(),
-            hash_hmac('sha256', $configuration->getAccessToken(), $configuration->getAppSecret())
+            $accessToken,
+            hash_hmac('sha256', $accessToken, $configuration->getAppSecret())
         );
 
         return json_decode($client->get($endpoint)->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
