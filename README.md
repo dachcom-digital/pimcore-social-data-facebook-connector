@@ -10,10 +10,10 @@ This Connector allows you to fetch social posts from Facebook.
 ![image](https://user-images.githubusercontent.com/700119/94452916-5f51cb80-01b0-11eb-86b2-026d8b7ef6f7.png)
 
 ### Release Plan
-| Release | Supported Pimcore Versions        | Supported Symfony Versions | Release Date | Maintained     | Branch     |
-|---------|-----------------------------------|----------------------------|--------------|----------------|------------|
-| **2.x** | `10.1` - `10.2`                   | `5.4`                      | 05.01.2022   | Feature Branch | master     |
-| **1.x** | `6.0` - `6.9`                     | `3.4`, `^4.4`              | 22.10.2020   | Unsupported    | [1.x](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/tree/1.x) |
+| Release | Supported Pimcore Versions | Supported Symfony Versions | Release Date | Maintained     | Branch                                                                                    |
+|---------|----------------------------|----------------------------|--------------|----------------|-------------------------------------------------------------------------------------------|
+| **2.x** | `10.1` - `10.5`            | `5.4`                      | 05.01.2022   | Feature Branch | master                                                                                    |
+| **1.x** | `6.0` - `6.9`              | `3.4`, `^4.4`              | 22.10.2020   | Unsupported    | [1.x](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/tree/1.x) |
 
 ## Installation
 
@@ -21,7 +21,7 @@ This Connector allows you to fetch social posts from Facebook.
 ```json
 "require" : {
     "dachcom-digital/social-data" : "~2.0.0",
-    "dachcom-digital/social-data-facebook-connector" : "~2.0.0",
+    "dachcom-digital/social-data-facebook-connector" : "~2.1.0",
 }
 ```
 
