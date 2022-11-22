@@ -100,9 +100,11 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
 
     getCustomConfigurationFields: function () {
 
-        var data = this.customConfiguration;
+        var items,
+            debugButtons = [],
+            data = this.customConfiguration;
 
-        return [
+        items = [
             {
                 xtype: 'textfield',
                 fieldLabel: 'Token Expiring Date',
@@ -125,75 +127,104 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
                 fieldLabel: 'App Secret',
                 allowBlank: false,
                 value: data.hasOwnProperty('appSecret') ? data.appSecret : null
-            },
+            }
+        ];
+
+        debugButtons = [
             {
                 xtype: 'button',
                 text: 'Debug Token',
                 iconCls: 'pimcore_icon_open_window',
                 hidden: !data.hasOwnProperty('accessToken') || data.accessToken === null || data.accessToken === '',
-                handler: function () {
-                    Ext.Ajax.request({
-                        url: '/admin/social-data/connector/facebook/debug-token',
-                        method: 'GET',
-                        success: function (response) {
-
-                            var debugWindow,
-                                gridData = [],
-                                res = Ext.decode(response.responseText);
-
-                            if (res.success !== true) {
-                                Ext.MessageBox.alert(t('error'), res.message);
-                                return;
-                            }
-
-                            Ext.Object.each(res.data, function (g, i) {
-                                gridData.push({label: g, value: Ext.encode(i)});
-                            })
-
-                            debugWindow = new Ext.Window({
-                                width: 700,
-                                height: 500,
-                                modal: true,
-                                title: t('Token Debug'),
-                                layout: 'fit',
-                                items: [
-                                    new Ext.grid.GridPanel({
-                                        flex: 1,
-                                        store: new Ext.data.Store({
-                                            fields: ['label', 'value'],
-                                            data: gridData
-                                        }),
-                                        border: true,
-                                        columnLines: true,
-                                        stripeRows: true,
-                                        title: false,
-                                        columns: [
-                                            {
-                                                text: t('label'),
-                                                sortable: false,
-                                                dataIndex: 'label',
-                                                hidden: false,
-                                                flex: 1,
-                                            },
-                                            {
-                                                cellWrap: true,
-                                                text: t('value'),
-                                                sortable: false,
-                                                dataIndex: 'value',
-                                                hidden: false,
-                                                flex: 2
-                                            }
-                                        ]
-                                    })
-                                ]
-                            });
-
-                            debugWindow.show();
-
-                        }.bind(this)
-                    });
-                }.bind(this)
+                handler: this.debugToken.bind(this, null)
             },
-        ];
+        ]
+
+        if (data.hasOwnProperty('pages') && Ext.isArray(data.pages)) {
+            Ext.Array.each(data.pages, function (page) {
+                debugButtons.push({
+                    xtype: 'button',
+                    text: 'Debug Token (' + (page.name ? page.name : page.id) + ')',
+                    iconCls: 'pimcore_icon_open_window',
+                    hidden: !page.hasOwnProperty('accessToken') || page.accessToken === null || page.accessToken === '',
+                    handler: this.debugToken.bind(this, page.id)
+                });
+            }.bind(this));
+        }
+
+        if (debugButtons.length > 0) {
+            items.push({
+                xtype: 'fieldcontainer',
+                layout: 'hbox',
+                hideLabel: true,
+                items: debugButtons,
+            })
+        }
+
+        return items;
+    },
+
+    debugToken: function (pageId) {
+
+        Ext.Ajax.request({
+            url: '/admin/social-data/connector/facebook/debug-token' + (pageId ? '?pageId=' + pageId : ''),
+            method: 'GET',
+            success: function (response) {
+
+                var debugWindow,
+                    gridData = [],
+                    res = Ext.decode(response.responseText);
+
+                if (res.success !== true) {
+                    Ext.MessageBox.alert(t('error'), res.message);
+                    return;
+                }
+
+                Ext.Object.each(res.data, function (g, i) {
+                    gridData.push({label: g, value: Ext.encode(i)});
+                })
+
+                debugWindow = new Ext.Window({
+                    width: 700,
+                    height: 500,
+                    modal: true,
+                    title: t('Token Debug'),
+                    layout: 'fit',
+                    items: [
+                        new Ext.grid.GridPanel({
+                            flex: 1,
+                            store: new Ext.data.Store({
+                                fields: ['label', 'value'],
+                                data: gridData
+                            }),
+                            border: true,
+                            columnLines: true,
+                            stripeRows: true,
+                            title: false,
+                            columns: [
+                                {
+                                    text: t('label'),
+                                    sortable: false,
+                                    dataIndex: 'label',
+                                    hidden: false,
+                                    flex: 1,
+                                },
+                                {
+                                    cellWrap: true,
+                                    text: t('value'),
+                                    sortable: false,
+                                    dataIndex: 'value',
+                                    hidden: false,
+                                    flex: 2
+                                }
+                            ]
+                        })
+                    ]
+                });
+
+                debugWindow.show();
+
+            }.bind(this)
+        });
     }
 });
