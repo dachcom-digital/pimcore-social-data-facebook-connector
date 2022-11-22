@@ -3,6 +3,7 @@
 namespace SocialData\Connector\Facebook\Controller\Admin;
 
 use Carbon\Carbon;
+use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse;
@@ -10,6 +11,7 @@ use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
 use SocialDataBundle\Connector\ConnectorDefinitionInterface;
 use SocialDataBundle\Controller\Admin\Traits\ConnectResponseTrait;
+use SocialDataBundle\Exception\BuildException;
 use SocialDataBundle\Service\ConnectorServiceInterface;
 use SocialDataBundle\Service\EnvironmentServiceInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -134,7 +136,20 @@ class FacebookController extends AdminController
         $connectorEngineConfig->setAccessTokenExpiresAt($expiresAt, true);
 
         // now set page tokens
-        $pageTokens = $this->facebookClient->makeCall('/me/accounts?fields=name,access_token', 'GET', $connectorEngineConfig);
+        $client = $this->facebookClient->getClient($connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition()));
+        $accessToken = $connectorEngineConfig->getAccessToken();
+
+        $url = '/me/accounts?fields=name,access_token';
+
+        try {
+            $response = $client->get($url, $accessToken);
+        } catch (FacebookResponseException $e) {
+            throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $url));
+        } catch (FacebookSDKException $e) {
+            throw new BuildException(sprintf('facebook SDK error: %s [endpoint: %s]', $e->getMessage(), $url));
+        }
+
+        $pageTokens = $response->getDecodedBody();
 
         $pages = [];
         foreach ($pageTokens['data'] ?? [] as $page) {
