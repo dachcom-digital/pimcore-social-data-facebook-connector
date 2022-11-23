@@ -80,7 +80,8 @@ class SocialPostBuilder implements SocialPostBuilderInterface
             ->fields([$posts]);
 
         $resolver->setDefaults([
-            'facebookQueryBuilder' => $queryBuilder
+            'facebookQueryBuilder' => $queryBuilder,
+            'pageId'               => $feedConfiguration->getPageId(),
         ]);
 
         $resolver->setRequired(['facebookQueryBuilder']);
@@ -105,11 +106,19 @@ class SocialPostBuilder implements SocialPostBuilderInterface
 
         /** @var FacebookQueryBuilder $fqbRequest */
         $fqbRequest = $options['facebookQueryBuilder'];
+        $pageId = $options['pageId'];
 
         $url = $fqbRequest->asEndpoint();
 
+        $accessToken = $engineConfiguration->getAccessToken();
+
+        if ($pageId !== null) {
+            $pageAccessToken = $engineConfiguration->getPageConfig($pageId, 'accessToken');
+            $accessToken = $pageAccessToken ?? $accessToken;
+        }
+
         try {
-            $response = $client->get($url, $engineConfiguration->getAccessToken());
+            $response = $client->get($url, $accessToken);
         } catch (FacebookResponseException $e) {
             throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $url));
         } catch (FacebookSDKException $e) {
@@ -200,7 +209,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         $socialPost->setSocialCreationDate($creationTime);
         $socialPost->setContent($element['message']);
         $socialPost->setUrl($element['permalink_url']);
-        $socialPost->setPosterUrl($element['full_picture']);
+        $socialPost->setPosterUrl($element['full_picture'] ?? null);
 
         $data->setTransformedElement($socialPost);
     }

@@ -32,6 +32,11 @@ class EngineConfiguration implements ConnectorEngineConfigurationInterface
     protected $appSecret;
 
     /**
+     * @var array
+     */
+    protected $pages = [];
+
+    /**
      * {@inheritdoc}
      */
     public static function getFormClass()
@@ -115,5 +120,54 @@ class EngineConfiguration implements ConnectorEngineConfigurationInterface
     public function getAppSecret()
     {
         return $this->appSecret;
+    }
+
+    /**
+     * @param array|null $pages
+     */
+    public function setPages(?array $pages)
+    {
+        if (!is_array($pages)) {
+            return;
+        }
+
+        $this->pages = $pages;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPages()
+    {
+        return $this->pages;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasPages()
+    {
+        return count($this->pages) > 0;
+    }
+
+    /**
+     * @param        $pageId
+     * @param string $config
+     *
+     * @return false|mixed|null
+     */
+    public function getPageConfig($pageId, string $config)
+    {
+        if ($this->hasPages() === false) {
+            return false;
+        }
+
+        foreach ($this->getPages() as $page) {
+            if ($page['id'] === $pageId) {
+                return $page[$config] ?? null;
+            }
+        }
+
+        return null;
     }
 }

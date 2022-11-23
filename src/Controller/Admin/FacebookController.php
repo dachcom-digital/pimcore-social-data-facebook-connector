@@ -3,6 +3,7 @@
 namespace SocialData\Connector\Facebook\Controller\Admin;
 
 use Carbon\Carbon;
+use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Exceptions\FacebookSDKException;
 use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Bundle\AdminBundle\HttpFoundation\JsonResponse;
@@ -10,6 +11,7 @@ use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
 use SocialDataBundle\Connector\ConnectorDefinitionInterface;
 use SocialDataBundle\Controller\Admin\Traits\ConnectResponseTrait;
+use SocialDataBundle\Exception\BuildException;
 use SocialDataBundle\Service\ConnectorServiceInterface;
 use SocialDataBundle\Service\EnvironmentServiceInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -132,10 +134,61 @@ class FacebookController extends AdminController
 
         $connectorEngineConfig->setAccessToken($accessToken->getValue(), true);
         $connectorEngineConfig->setAccessTokenExpiresAt($expiresAt, true);
+
+        // now set page tokens
+        $client = $this->facebookClient->getClient($connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition()));
+        $accessToken = $connectorEngineConfig->getAccessToken();
+
+        $url = '/me/accounts?fields=name,access_token';
+
+        try {
+            $response = $client->get($url, $accessToken);
+        } catch (FacebookResponseException $e) {
+            throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $url));
+        } catch (FacebookSDKException $e) {
+            throw new BuildException(sprintf('facebook SDK error: %s [endpoint: %s]', $e->getMessage(), $url));
+        }
+
+        $pageTokens = $response->getDecodedBody();
+
+        $pages = [];
+        foreach ($pageTokens['data'] ?? [] as $page) {
+            $pages[] = [
+                'id'          => $page['id'] ?? null,
+                'name'        => $page['name'] ?? null,
+                'accessToken' => $page['access_token'] ?? null,
+            ];
+        }
+
+        $connectorEngineConfig->setPages($pages);
+
         $this->connectorService->updateConnectorEngineConfiguration('facebook', $connectorEngineConfig);
 
         return $this->buildConnectSuccessResponse();
     }
+
+    public function feedConfigAction(Request $request): JsonResponse
+    {
+        $feedConfig = [];
+
+        try {
+            $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
+        } catch (\Throwable $e) {
+            return $this->adminJson(['error' => true, 'message' => $e->getMessage()]);
+        }
+
+        if ($connectorEngineConfig->hasPages()) {
+            $feedConfig['pages'] = array_values(array_map(static function (array $page) {
+                return ['key' => $page['name'] ?? $page['id'], 'value' => $page['id']];
+            }, $connectorEngineConfig->getPages()));
+        }
+
+        return $this->adminJson([
+            'success' => true,
+            'data'    => $feedConfig
+        ]);
+    }
+
 
     /**
      * @param Request $request
@@ -144,13 +197,19 @@ class FacebookController extends AdminController
      */
     public function debugTokenAction(Request $request)
     {
+        $pageId = $request->query->get('pageId', null);
+
         try {
             $connectorEngineConfig = $this->getConnectorEngineConfig($this->getConnectorDefinition());
         } catch (\Throwable $e) {
             return $this->adminJson(['error' => true, 'message' => $e->getMessage()]);
         }
 
-        $token = $connectorEngineConfig->getAccessToken();
+        if ($pageId !== null && $connectorEngineConfig->hasPages()) {
+            $token = $connectorEngineConfig->getPageConfig($pageId, 'accessToken');
+        } else {
+            $token = $connectorEngineConfig->getAccessToken();
+        }
 
         if (empty($token)) {
             return $this->adminJson(['error' => true, 'message' => 'acccess token is empty']);
