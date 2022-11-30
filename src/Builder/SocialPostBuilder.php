@@ -3,6 +3,7 @@
 namespace SocialData\Connector\Facebook\Builder;
 
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use SocialData\Connector\Facebook\Client\FacebookClient;
 use SocialData\Connector\Facebook\Model\EngineConfiguration;
 use SocialData\Connector\Facebook\Model\FeedConfiguration;
@@ -163,7 +164,11 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         if ($element['created_time'] instanceof \DateTime) {
             $creationTime = Carbon::instance($element['created_time']);
         } else {
-            $creationTime = Carbon::now();
+            try {
+                $creationTime = Carbon::parse($element['created_time']);
+            } catch (InvalidFormatException) {
+                $creationTime = Carbon::now();
+            }
         }
 
         $socialPost->setSocialCreationDate($creationTime);
