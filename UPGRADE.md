@@ -1,5 +1,8 @@
 # Upgrade Notes
 
+## 2.1.1
+- [BUGFIX] Improve fallback when parsing the date [#9](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/issues/9)
+
 ## 2.1.0
 - [BUGFIX] Use Page Access Token [#6](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/issues/6)
 
