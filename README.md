@@ -12,36 +12,27 @@ This Connector allows you to fetch social posts from Facebook.
 ### Release Plan
 | Release | Supported Pimcore Versions | Supported Symfony Versions | Release Date | Maintained     | Branch                                                                                    |
 |---------|----------------------------|----------------------------|--------------|----------------|-------------------------------------------------------------------------------------------|
-| **2.x** | `10.1` - `10.6`            | `5.4`                      | 05.01.2022   | Feature Branch | master                                                                                    |
+| **3.x** | `11.0`                     | `6.2`                      | --           | Feature Branch | master                                                                                    |
+| **2.x** | `10.1` - `10.6`            | `5.4`                      | 05.01.2022   | Unsupported    | [2.x](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/tree/2.x) |
 | **1.x** | `6.0` - `6.9`              | `3.4`, `^4.4`              | 22.10.2020   | Unsupported    | [1.x](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/tree/1.x) |
 
 ## Installation
 
-### I. Add Dependency
 ```json
 "require" : {
-    "dachcom-digital/social-data" : "~2.0.0",
-    "dachcom-digital/social-data-facebook-connector" : "~2.1.0",
+    "dachcom-digital/social-data" : "~3.0.0",
+    "dachcom-digital/social-data-facebook-connector" : "~3.0.0"
 }
 ```
 
-### II. Register Connector Bundle
+Add Bundle to `bundles.php`:
 ```php
-// src/Kernel.php
-namespace App;
-
-use Pimcore\HttpKernel\BundleCollection\BundleCollection;
-
-class Kernel extends \Pimcore\Kernel
-{
-    public function registerBundlesToCollection(BundleCollection $collection)
-    {
-        $collection->addBundle(new SocialData\Connector\Facebook\SocialDataFacebookConnectorBundle());
-    }
-}
+return [
+    SocialData\Connector\Facebook\SocialDataFacebookConnectorBundle::class => ['all' => true],
+];
 ```
 
-### III. Install Assets
+### Install Assets
 ```bash
 bin/console assets:install public --relative --symlink
 ```
@@ -89,10 +80,10 @@ Otherwise, you'll receive an error message. You may then need to repeat the conn
 
 ## Feed Configuration
 
-| Name | Description
-|------|----------------------|
-| `Page Id` | Defines which page entries should be imported |
-| `Limit` | Define a limit to restrict the amount of social posts to import (Default: 50) |
+| Name      | Description                                                                   |
+|-----------|-------------------------------------------------------------------------------|
+| `Page Id` | Defines which page entries should be imported                                 |
+| `Limit`   | Define a limit to restrict the amount of social posts to import (Default: 50) |
 
 ## Extended Connector Configuration
 Normally you don't need to modify connector (`connector_config`) configuration, so most of the time you can skip this step.
