@@ -14,7 +14,7 @@ class SocialDataFacebookConnectorExtension extends Extension
         $configuration = new Configuration();
         $this->processConfiguration($configuration, $configs);
 
-        $loader = new YamlFileLoader($container, new FileLocator([__DIR__ . '/../Resources/config']));
-        $loader->load('services.yml');
+        $loader = new YamlFileLoader($container, new FileLocator([__DIR__ . '/../../config']));
+        $loader->load('services.yaml');
     }
 }

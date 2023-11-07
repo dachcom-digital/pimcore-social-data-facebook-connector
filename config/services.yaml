@@ -37,3 +37,9 @@ services:
 
     SocialData\Connector\Facebook\Controller\Admin\FacebookController:
         tags: [ 'controller.service_arguments' ]
+
+    ## Events
+
+    SocialData\Connector\Facebook\EventListener\Admin\AssetListener:
+        tags:
+            - { name: kernel.event_subscriber }
