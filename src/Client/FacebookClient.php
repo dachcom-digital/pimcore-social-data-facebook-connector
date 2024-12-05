@@ -13,11 +13,8 @@ class FacebookClient
 {
     protected const GRAPH_VERSION = 'v12.0';
 
-    protected RouterInterface $router;
-
-    public function __construct(RouterInterface $router)
+    public function __construct(protected RouterInterface $router)
     {
-        $this->router = $router;
     }
 
     public function getClient(EngineConfiguration $configuration): Facebook

@@ -20,18 +20,11 @@ class FacebookController extends AdminAbstractController
 {
     use ConnectResponseTrait;
 
-    protected FacebookClient $facebookClient;
-    protected EnvironmentServiceInterface $environmentService;
-    protected ConnectorServiceInterface $connectorService;
-
     public function __construct(
-        FacebookClient $facebookClient,
-        EnvironmentServiceInterface $environmentService,
-        ConnectorServiceInterface $connectorService
+        protected FacebookClient $facebookClient,
+        protected EnvironmentServiceInterface $environmentService,
+        protected ConnectorServiceInterface $connectorService
     ) {
-        $this->facebookClient = $facebookClient;
-        $this->environmentService = $environmentService;
-        $this->connectorService = $connectorService;
     }
 
     public function connectAction(Request $request): Response
@@ -107,7 +100,7 @@ class FacebookController extends AdminAbstractController
         }
 
         $expiresAt = null;
-        if (is_array($accessTokenMetadata) && isset($accessTokenMetadata['data']['expires_at'])) {
+        if (isset($accessTokenMetadata['data']['expires_at'])) {
             $expiresAt = $accessTokenMetadata['data']['expires_at'] === 0 ? null : \DateTime::createFromFormat('U', $accessTokenMetadata['data']['expires_at']);
         }
 
@@ -182,7 +175,7 @@ class FacebookController extends AdminAbstractController
 
         $normalizedData = [];
 
-        if (is_array($accessTokenMetadata) && isset($accessTokenMetadata['data'])) {
+        if (isset($accessTokenMetadata['data'])) {
             foreach ($accessTokenMetadata['data'] as $rowKey => $rowValue) {
                 switch ($rowKey) {
                     case 'expires_at':
