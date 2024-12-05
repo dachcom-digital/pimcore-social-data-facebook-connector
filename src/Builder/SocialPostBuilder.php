@@ -18,11 +18,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SocialPostBuilder implements SocialPostBuilderInterface
 {
-    protected FacebookClient $facebookClient;
-
-    public function __construct(FacebookClient $facebookClient)
+    public function __construct(protected FacebookClient $facebookClient)
     {
-        $this->facebookClient = $facebookClient;
     }
 
     public function configureFetch(BuildConfig $buildConfig, OptionsResolver $resolver): void
@@ -96,10 +93,6 @@ class SocialPostBuilder implements SocialPostBuilderInterface
             $response = $this->facebookClient->makeGraphCall($query, $engineConfiguration, $pageId);
         } catch (\Throwable $e) {
             throw new BuildException(sprintf('graph error: %s [endpoint: %s]', $e->getMessage(), $query));
-        }
-
-        if (!is_array($response)) {
-            return;
         }
 
         if (!isset($response['posts']['data'])) {
