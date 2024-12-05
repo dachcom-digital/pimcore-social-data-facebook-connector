@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace SocialData\Connector\Facebook\QueryBuilder;
 
 final class FacebookQueryBuilder
@@ -13,9 +24,9 @@ final class FacebookQueryBuilder
         }
     }
 
-    public function node(string $graphNodeName): FacebookQueryBuilder
+    public function node(string $graphNodeName): self
     {
-        return new FacebookQueryBuilder($graphNodeName);
+        return new self($graphNodeName);
     }
 
     public function edge(string $edgeName, array $fields = []): GraphEdge
@@ -23,7 +34,7 @@ final class FacebookQueryBuilder
         return new GraphEdge($edgeName, $fields);
     }
 
-    public function fields(mixed $fields): FacebookQueryBuilder
+    public function fields(mixed $fields): self
     {
         if (!is_array($fields)) {
             $fields = func_get_args();
@@ -34,14 +45,14 @@ final class FacebookQueryBuilder
         return $this;
     }
 
-    public function limit(int $limit): FacebookQueryBuilder
+    public function limit(int $limit): self
     {
         $this->graphNode->limit($limit);
 
         return $this;
     }
 
-    public function modifiers(array $data): FacebookQueryBuilder
+    public function modifiers(array $data): self
     {
         $this->graphNode->modifiers($data);
 

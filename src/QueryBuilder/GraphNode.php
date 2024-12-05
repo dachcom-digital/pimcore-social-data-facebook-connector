@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace SocialData\Connector\Facebook\QueryBuilder;
 
 class GraphNode
@@ -23,7 +34,7 @@ class GraphNode
         }
     }
 
-    public function modifiers(array $data): GraphNode
+    public function modifiers(array $data): self
     {
         $this->modifiers = array_merge($this->modifiers, $data);
 
@@ -40,7 +51,7 @@ class GraphNode
         return $this->modifiers[$key] ?? null;
     }
 
-    public function limit(int $limit): GraphNode
+    public function limit(int $limit): self
     {
         return $this->modifiers([
             static::PARAM_LIMIT => $limit,
@@ -52,7 +63,7 @@ class GraphNode
         return $this->getModifier(static::PARAM_LIMIT);
     }
 
-    public function fields(mixed $fields): GraphNode
+    public function fields(mixed $fields): self
     {
         if (!is_array($fields)) {
             $fields = func_get_args();
