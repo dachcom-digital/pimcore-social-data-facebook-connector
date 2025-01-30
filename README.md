@@ -1,4 +1,5 @@
 # Pimcore Social Data - Facebook Connector
+
 [![Software License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Software License](https://img.shields.io/badge/license-DCL-white.svg?style=flat-square&color=%23ff5c5c)](LICENSE.md)
 [![Latest Release](https://img.shields.io/packagist/v/dachcom-digital/social-data-facebook-connector.svg?style=flat-square)](https://packagist.org/packages/dachcom-digital/social-data-facebook-connector)
@@ -12,7 +13,7 @@ This Connector allows you to fetch social posts from Facebook.
 ### Release Plan
 | Release | Supported Pimcore Versions | Supported Symfony Versions | Release Date | Maintained     | Branch                                                                                    |
 |---------|----------------------------|----------------------------|--------------|----------------|-------------------------------------------------------------------------------------------|
-| **3.x** | `11.0`                     | `6.2`                      | 07.11.2023   | Feature Branch | master                                                                                    |
+| **3.x** | `11.0`                     | `6.4`                      | 07.11.2023   | Feature Branch | master                                                                                    |
 | **2.x** | `10.1` - `10.6`            | `5.4`                      | 05.01.2022   | Unsupported    | [2.x](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/tree/2.x) |
 | **1.x** | `6.0` - `6.9`              | `3.4`, `^4.4`              | 22.10.2020   | Unsupported    | [1.x](https://github.com/dachcom-digital/pimcore-social-data-facebook-connector/tree/1.x) |
 
@@ -21,7 +22,7 @@ This Connector allows you to fetch social posts from Facebook.
 ```json
 "require" : {
     "dachcom-digital/social-data" : "~3.1.0",
-    "dachcom-digital/social-data-facebook-connector" : "~3.1.0"
+    "dachcom-digital/social-data-facebook-connector" : "~3.2.0"
 }
 ```
 
@@ -97,14 +98,15 @@ social_data:
             connector_config:
                 api_connect_permission: ['pages_show_list'] # default value
 ```
+
 ***
+
+## Upgrade Info
+Before updating, please [check our upgrade notes!](UPGRADE.md)
 
 ## License
 **DACHCOM.DIGITAL AG**, Löwenhofstrasse 15, 9424 Rheineck, Schweiz  
 [dachcom.com](https://www.dachcom.com), dcdi@dachcom.ch  
-Copyright © 2024 DACHCOM.DIGITAL. All rights reserved.  
+Copyright © 2025 DACHCOM.DIGITAL. All rights reserved.  
 
 For licensing details please visit [LICENSE.md](LICENSE.md)  
-
-## Upgrade Info
-Before updating, please [check our upgrade notes!](UPGRADE.md)

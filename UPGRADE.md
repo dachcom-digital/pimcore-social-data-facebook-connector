@@ -1,5 +1,8 @@
 # Upgrade Notes
 
+## 3.2.0
+- [IMPROVEMENT] Update to graph `v22.0`
+
 ## 3.1.0
 - [LICENSE] Dual-License with GPL and Dachcom Commercial License (DCL) added
 
