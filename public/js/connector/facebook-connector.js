@@ -96,6 +96,7 @@ SocialData.Connector.Facebook = Class.create(SocialData.Connector.AbstractConnec
         );
 
         connectWindow.open();
+        connectWindow.loginWindow.resizeTo(1000, 800);
     },
 
     getCustomConfigurationFields: function () {

@@ -22,7 +22,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class FacebookClient
 {
-    protected const GRAPH_VERSION = 'v12.0';
+    protected const GRAPH_VERSION = 'v22.0';
 
     public function __construct(protected RouterInterface $router)
     {

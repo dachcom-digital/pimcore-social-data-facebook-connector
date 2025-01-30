@@ -129,9 +129,6 @@ class SocialPostBuilder implements SocialPostBuilderInterface
 
     public function filter(FilterData $data): void
     {
-        $options = $data->getOptions();
-        $buildConfig = $data->getBuildConfig();
-
         $element = $data->getTransferredData();
 
         if (!is_array($element)) {
@@ -155,9 +152,6 @@ class SocialPostBuilder implements SocialPostBuilderInterface
 
     public function transform(TransformData $data): void
     {
-        $options = $data->getOptions();
-        $buildConfig = $data->getBuildConfig();
-
         $element = $data->getTransferredData();
         $socialPost = $data->getSocialPostEntity();
 
@@ -176,7 +170,7 @@ class SocialPostBuilder implements SocialPostBuilderInterface
         }
 
         $socialPost->setSocialCreationDate($creationTime);
-        $socialPost->setContent($element['message']);
+        $socialPost->setContent($element['message'] ?? null);
         $socialPost->setUrl($element['permalink_url']);
         $socialPost->setPosterUrl($element['full_picture'] ?? null);
 
