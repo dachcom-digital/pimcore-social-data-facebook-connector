@@ -51,7 +51,7 @@ class ConnectorDefinition implements ConnectorDefinitionInterface
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
-            'api_connect_permission' => ['pages_show_list']
+            'api_connect_permission' => ['pages_show_list', 'pages_read_engagement', 'pages_read_user_content']
         ]);
 
         $resolver->setAllowedTypes('api_connect_permission', 'string[]');
